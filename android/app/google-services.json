@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "866671415789",
+    "firebase_url": "https://bagibarang-f6e64.firebaseio.com",
+    "project_id": "bagibarang-f6e64",
+    "storage_bucket": "bagibarang-f6e64.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:866671415789:android:0e225327e89cce761597e4",
+        "android_client_info": {
+          "package_name": "com.ciptaaplikatama.bagibarang"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "866671415789-ae4ba38im099e3jsmnd7jgv73b77gnpa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ciptaaplikatama.bagibarang",
+            "certificate_hash": "4ab387719fbeb8e81c2089a7a2f6c148e3e3401e"
+          }
+        },
+        {
+          "client_id": "866671415789-8fg1e6u530u6fn13lacel5hf2na1sp5i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQxr64_6IUFVO-IMrtOkfRzWzxI8Q4ij0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "866671415789-8fg1e6u530u6fn13lacel5hf2na1sp5i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
