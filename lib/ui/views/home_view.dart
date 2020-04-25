@@ -1,9 +1,12 @@
 import 'dart:ui';
 
-import 'package:bagi_barang/pages/products.dart';
 import 'package:bagi_barang/services/authentication.dart';
+
+import 'package:bagi_barang/viewmodels/home_view_model.dart';
+import 'package:bagi_barang/ui/widgets/products.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider_architecture/viewmodel_provider.dart';
 
 //void main() => runApp(MyApp());
 
@@ -32,9 +35,10 @@ import 'package:flutter/material.dart';
 //   }
 // }
 
-class HomePage extends StatefulWidget {
-  HomePage({Key key, this.title, this.auth, this.user, this.logoutCallback})
-      : super(key: key);
+class HomeView extends StatelessWidget {
+  // HomeView({Key key,// this.title, this.auth, this.user, this.logoutCallback
+  // })
+  //     : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -45,28 +49,28 @@ class HomePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-  final String title;
-  final BaseAuth auth;
-  final VoidCallback logoutCallback;
-  final FirebaseUser user;
+  // final String title;
+  // final BaseAuth auth;
+  // final VoidCallback logoutCallback;
+  // final FirebaseUser user;
 
-  @override
-  _HomePageState createState() => _HomePageState();
-}
+  // @override
+  // _HomePageState createState() => _HomePageState();
+//}
 
-class _HomePageState extends State<HomePage> {
+//class _HomePageState extends State<HomeView> {
 //  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-    //  _counter++;
-    });
-  }
+  // void _incrementCounter() {
+  //   setState(() {
+  //     // This call to setState tells the Flutter framework that something has
+  //     // changed in this State, which causes it to rerun the build method below
+  //     // so that the display can reflect the updated values. If we changed
+  //     // _counter without calling setState(), then the build method would not be
+  //     // called again, and so nothing would appear to happen.
+  //   //  _counter++;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -77,78 +81,87 @@ class _HomePageState extends State<HomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
 
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        drawer: Theme(
-            data: Theme.of(context).copyWith(
-              canvasColor: Colors.transparent,
-            ),
-            child: sideNav(context)),
-        appBar: AppBar(
-            // Here we take the value from the MyHomePage object that was created by
-            // the App.build method, and use it to set our appbar title.
-            iconTheme: new IconThemeData(color: Colors.black),
-            bottom: TabBar(
-              labelColor: Colors.black,
-              tabs: [
-                Tab(icon: Icon(Icons.directions_car)),
-                Tab(icon: Icon(Icons.directions_transit)),
-                Tab(icon: Icon(Icons.directions_bike)),
-              ],
-            ),
-            title: Text(widget.title,
-                style: TextStyle(fontFamily: 'MB', color: Colors.black)),
-            backgroundColor: Colors.white),
-        body: TabBarView(
-          children: [
-            Products(),
-            // Center(
-            //   // Center is a layout widget. It takes a single child and positions it
-            //   // in the middle of the parent.
-            //   child: Column(
-            //     // Column is also a layout widget. It takes a list of children and
-            //     // arranges them vertically. By default, it sizes itself to fit its
-            //     // children horizontally, and tries to be as tall as its parent.
-            //     //
-            //     // Invoke "debug painting" (press "p" in the console, choose the
-            //     // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            //     // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            //     // to see the wireframe for each widget.
-            //     //
-            //     // Column has various properties to control how it sizes itself and
-            //     // how it positions its children. Here we use mainAxisAlignment to
-            //     // center the children vertically; the main axis here is the vertical
-            //     // axis because Columns are vertical (the cross axis would be
-            //     // horizontal).
-            //     mainAxisAlignment: MainAxisAlignment.center,
-            //     children: <Widget>[
-            //       Text(
-            //         'You have pushed the button this many times:',
-            //       ),
-            //       Text(
-            //         '$_counter',
-            //         style: Theme.of(context).textTheme.headline4,
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            // // This trailing comma makes auto-formatting nicer for build methods.
+    String title;
+    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    if (arguments != null) title = arguments['title'];
 
-            Icon(Icons.directions_transit),
-            Icon(Icons.directions_bike),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _incrementCounter,
-          tooltip: 'Increment',
-          child: Icon(Icons.add),
+    return ViewModelProvider<HomeViewModel>.withConsumer(
+      viewModel: HomeViewModel(),
+      // onModelReady: (model) => model.handleStartUpLogic(),
+      builder: (context, model, child) => DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          drawer: Theme(
+              data: Theme.of(context).copyWith(
+                canvasColor: Colors.transparent,
+              ),
+              child: sideNav(context, model)),
+          appBar: AppBar(
+              // Here we take the value from the MyHomePage object that was created by
+              // the App.build method, and use it to set our appbar title.
+              iconTheme: new IconThemeData(color: Colors.black),
+              bottom: TabBar(
+                labelColor: Colors.black,
+                tabs: [
+                  Tab(icon: Icon(Icons.directions_car)),
+                  Tab(icon: Icon(Icons.directions_transit)),
+                  Tab(icon: Icon(Icons.directions_bike)),
+                ],
+              ),
+              title: Text(title,
+                  style: TextStyle(fontFamily: 'MB', color: Colors.black)),
+              backgroundColor: Colors.white),
+          body: TabBarView(
+            children: [
+              Products(),
+              // Center(
+              //   // Center is a layout widget. It takes a single child and positions it
+              //   // in the middle of the parent.
+              //   child: Column(
+              //     // Column is also a layout widget. It takes a list of children and
+              //     // arranges them vertically. By default, it sizes itself to fit its
+              //     // children horizontally, and tries to be as tall as its parent.
+              //     //
+              //     // Invoke "debug painting" (press "p" in the console, choose the
+              //     // "Toggle Debug Paint" action from the Flutter Inspector in Android
+              //     // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+              //     // to see the wireframe for each widget.
+              //     //
+              //     // Column has various properties to control how it sizes itself and
+              //     // how it positions its children. Here we use mainAxisAlignment to
+              //     // center the children vertically; the main axis here is the vertical
+              //     // axis because Columns are vertical (the cross axis would be
+              //     // horizontal).
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: <Widget>[
+              //       Text(
+              //         'You have pushed the button this many times:',
+              //       ),
+              //       Text(
+              //         '$_counter',
+              //         style: Theme.of(context).textTheme.headline4,
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              // // This trailing comma makes auto-formatting nicer for build methods.
+
+              Icon(Icons.directions_transit),
+              Icon(Icons.directions_bike),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            //onPressed: _incrementCounter,
+            onPressed: () {},
+            tooltip: 'Increment',
+            child: Icon(Icons.add),
+          ),
         ),
       ),
     );
   }
 
-  Drawer sideNav(BuildContext context) {
+  Drawer sideNav(BuildContext context, HomeViewModel model) {
     return Drawer(
       child: Stack(children: <Widget>[
         //first child be the blur background
@@ -170,12 +183,12 @@ class _HomePageState extends State<HomePage> {
                     Colors.green,
                     Colors.teal[900],
                   ])),
-              accountEmail: new Text(widget.user.email),
-              accountName: new Text(widget.user.displayName),
+              accountEmail: new Text(model.currentFirebaseUser.email),
+              accountName: new Text(model.currentFirebaseUser.displayName),
               currentAccountPicture: new GestureDetector(
                 child: new CircleAvatar(
                     backgroundImage: new NetworkImage(
-                  widget.user.photoUrl,
+                  model.currentFirebaseUser.photoUrl,
                 )
                     // "https://yt3.ggpht.com/a-/AOh14GjOA59oi_I9tSCzIfgFcPQdBiMp7JyITQNcRhU7aA=s88-c-k-c0xffffffff-no-rj-mo"),
                     ),
@@ -222,20 +235,11 @@ class _HomePageState extends State<HomePage> {
               ),
               trailing: new Icon(Icons.cancel, color: Colors.white),
               //onTap: () => Navigator.pop(context),
-              onTap: signOut,
+              onTap: () => model.logout(),
             ),
           ],
         ),
       ]),
     );
-  }
-
-  signOut() async {
-    try {
-      await widget.auth.signOut();
-      widget.logoutCallback();
-    } catch (e) {
-      print(e);
-    }
   }
 }

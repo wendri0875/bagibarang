@@ -3,37 +3,85 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Product {
-  String idprod;
-  String image;
-  String pdesc;
-  String pname;
-  double pricestd;
-  Timestamp uploaddate;
-  double weightstd;
-
-  Product(
-      { this.idprod,
+  final String idprod;
+ final String image;
+  final String pdesc;
+  final String pname;
+  final double pricestd;
+  final Timestamp uploaddate;
+  final double weightstd;
+  Product({
+        this.idprod,
         this.image,
       this.pdesc,
       this.pname,
       this.pricestd,
       this.uploaddate,
-      this.weightstd}) {
-    this.image = image;
-    this.pdesc = pdesc;
-    this.pname = pname;
-    this.pricestd = pricestd;
-    this.uploaddate = uploaddate;
-    this.weightstd = weightstd;
+      this.weightstd
+  });
+
+
+  Map<String, dynamic> toMap() {
+    return {
+      'idprod': idprod,
+      'image': image,
+      'pdesc': pdesc,
+      'pname': pname,
+      'pricestd': pricestd,
+      'uploaddate': uploaddate,
+      'weightstd': weightstd,
+    };
   }
 
-  Product.fromSnapshot(DocumentSnapshot snapshot) {
-    this.idprod = snapshot.documentID;
-    this.image = snapshot?.data["image"]?.toString() ?? null;
-    this.pdesc = snapshot?.data["pdesc"]?.toString() ?? null;
-    this.pname = snapshot?.data["pname"]?.toString() ?? null;
-    this.pricestd = snapshot?.data["pricestd"]?.toDouble() ?? null;
-    this.uploaddate = snapshot?.data["uploaddate"] ?? null;
-    this.weightstd = snapshot?.data["weightstd"]?.toDouble() ?? null;
+  static Product fromMap(Map<String, dynamic> map, String documentId) {
+    if (map == null) return null;
+
+    return Product(
+    idprod : documentId,
+    image : map["image"],
+    pdesc : map["pdesc"],
+    pname : map["pname"],
+    pricestd : map["pricestd"].toDouble(),
+    uploaddate : map["uploaddate"],
+    weightstd : map["weightstd"].toDouble(),
+    );
   }
 }
+
+//  class Product {
+//   final String idprod;
+//  final String image;
+//   final String pdesc;
+//   final String pname;
+//   final double pricestd;
+//   final Timestamp uploaddate;
+//   final double weightstd;
+
+//   Product(
+      // { 
+      //   this.idprod,
+      //   this.image,
+      // this.pdesc,
+      // this.pname,
+      // this.pricestd,
+      // this.uploaddate,
+      // this.weightstd
+      // });
+
+
+
+
+//   static Product fromMap(Map<String, dynamic> map) {
+//     if (map == null) return null;
+
+//     return Product(
+//    idprod = map["image"]?.toString() ?? null,
+//     image = map["image"]?.toString() ?? null,
+//     pdesc = map["pdesc"]?.toString() ?? null,
+//     pname = map["pname"]?.toString() ?? null,
+//     pricestd = map["pricestd"]?.toDouble() ?? null,
+//     uploaddate = map["uploaddate"] ?? null,
+//     weightstd = map["weightstd"]?.toDouble() ?? null,
+//     );
+//   }
+//}

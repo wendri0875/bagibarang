@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:bagi_barang/provider/priceprovider.dart';
 import 'package:bagi_barang/provider/varianprovider.dart';
 import 'package:bagi_barang/provider/weightprovider.dart';
+import 'package:bagi_barang/ui/widgets/orders.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:bagi_barang/pages/orders.dart';
+//import 'package:bagi_barang/pages/orders.dart';
 import 'dart:ui';
 import 'package:bagi_barang/models/product.dart';
 import 'package:bagi_barang/models/variant.dart';
@@ -194,8 +195,8 @@ class _VarianDetailState extends State<VarianDetail> {
                         //  child: Text('data'),
                         //child: Container(
                         child: Orders(
-                          idprod: widget.product.idprod,
-                          varian: widget.varian,
+                         // idprod: widget.product.idprod,
+                         // varian: widget.varian,
                         ),
                         //),
                       ),

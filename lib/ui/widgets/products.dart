@@ -1,4 +1,6 @@
-import 'package:bagi_barang/pages/productgrid.dart';
+
+
+import 'package:bagi_barang/ui/widgets/productgrid.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
 
