@@ -11,6 +11,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
 class FirestoreService {
+  final String _productPath = 'companies/Al-Hayya/Products';
+
   final String _variantPath = 'companies/Al-Hayya/Products/{{idprod}}/Variant';
 
   final String _ordersPath =
@@ -50,7 +52,10 @@ class FirestoreService {
 
   Stream listenToProductsRealTime() {
     // Register the handler for when the posts data changes
-    _productsCollectionReference.snapshots().listen((productsSnapshot) {
+    _productsCollectionReference
+        .orderBy('uploaddate', descending: true)
+        .snapshots()
+        .listen((productsSnapshot) {
       if (productsSnapshot.documents.isNotEmpty) {
         var products = productsSnapshot.documents
             .map((snapshot) =>
@@ -100,7 +105,10 @@ class FirestoreService {
     final CollectionReference _variantCollectionReference =
         Firestore.instance.collection(s);
 
-    _variantCollectionReference.snapshots().listen((variantSnapshot) {
+    _variantCollectionReference
+        .orderBy('no')
+        .snapshots()
+        .listen((variantSnapshot) {
       if (variantSnapshot.documents.isNotEmpty) {
         var variant = variantSnapshot.documents
             .map((snapshot) =>
@@ -251,6 +259,119 @@ class FirestoreService {
     await _ordersCollectionReference.document(documentId).delete();
   }
 
+  Future addProduct(Product product) async {
+    // String s = sprintf(_ordersPath, [idprod, label]);
+
+    final CollectionReference _productsCollectionReference =
+        Firestore.instance.collection(_productPath);
+
+    try {
+      DocumentReference docRef =
+          await _productsCollectionReference.add(product.toMap());
+
+      Variant s = Variant(
+          label: 'S',
+          no: 1,
+          price: product.pricestd,
+          weight: product.weightstd);
+      await addVarian(docRef.documentID, s);
+
+      Variant m = Variant(
+          label: 'M',
+          no: 2,
+          price: product.pricestd,
+          weight: product.weightstd);
+      await addVarian(docRef.documentID, m);
+
+      Variant l = Variant(
+          label: 'L',
+          no: 3,
+          price: product.pricestd,
+          weight: product.weightstd);
+      await addVarian(docRef.documentID, l);
+
+      Variant xl = Variant(
+          label: 'XL',
+          no: 4,
+          price: product.pricestd,
+          weight: product.weightstd);
+      await addVarian(docRef.documentID, xl);
+
+      return true;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future updateProduct(Product product) async {
+    final CollectionReference _ordersCollectionReference =
+        Firestore.instance.collection(_productPath);
+
+    try {
+      await _ordersCollectionReference
+          .document(product.idprod)
+          .updateData(product.toMap());
+      return true;
+    } catch (e) {
+      if (e is PlatformException) {
+        return e.message;
+      }
+
+      return e.toString();
+    }
+  }
+
+  Future deleteProduct(String idprod) async {
+    final CollectionReference _ordersCollectionReference =
+        Firestore.instance.collection(_productPath);
+    await _ordersCollectionReference.document(idprod).delete();
+  }
+
+  //----------------------------
+  Future addVarian(String idprod, Variant varian) async {
+    String s = sprintf(_variantPath, [idprod]);
+
+    final CollectionReference _variantCollectionReference =
+        Firestore.instance.collection(s);
+
+    try {
+      // add with id
+      //await _variantCollectionReference.add(varian.toMap());
+      await _variantCollectionReference
+          .document(varian.label)
+          .setData(varian.toMap());
+      return true;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future updateVarian(String idprod, Variant varian) async {
+    String s = sprintf(_variantPath, [idprod]);
+    final CollectionReference _variantCollectionReference =
+        Firestore.instance.collection(s);
+
+    try {
+      await _variantCollectionReference
+          .document(varian.label)
+          .updateData(varian.toMap());
+      return true;
+    } catch (e) {
+      if (e is PlatformException) {
+        return e.message;
+      }
+
+      return e.toString();
+    }
+  }
+
+  Future deleteVarian(String idprod, String documentId) async {
+    String s = sprintf(_ordersPath, [idprod]);
+    final CollectionReference _variantCollectionReference =
+        Firestore.instance.collection(s);
+    await _variantCollectionReference.document(documentId).delete();
+  }
+
   //----------------------------
   Future deleteStock(String idprod, String label, String documentId) async {
     String s = sprintf(_stockcardPath, [idprod, label]);
@@ -294,12 +415,10 @@ class FirestoreService {
     }
   }
 
-
-
-
   //-----------------------
-    Future addAlloc(String idprod, String label, String orderid, Alloc alloc) async {
-    String s = sprintf(_allocsPath, [idprod, label,orderid]);
+  Future addAlloc(
+      String idprod, String label, String orderid, Alloc alloc) async {
+    String s = sprintf(_allocsPath, [idprod, label, orderid]);
 
     final CollectionReference _allocsCollectionReference =
         Firestore.instance.collection(s);
@@ -312,8 +431,9 @@ class FirestoreService {
     }
   }
 
-  Future updateAlloc(String idprod, String label, String orderid, Alloc alloc) async {
-    String s = sprintf(_allocsPath, [idprod, label,orderid]);
+  Future updateAlloc(
+      String idprod, String label, String orderid, Alloc alloc) async {
+    String s = sprintf(_allocsPath, [idprod, label, orderid]);
     final CollectionReference _allocsCollectionReference =
         Firestore.instance.collection(s);
 
@@ -332,21 +452,21 @@ class FirestoreService {
   }
 
   //----------------------------
-  Future deleteAlloc(String idprod, String label,String orderid, String documentId) async {
-    String s = sprintf(_allocsPath, [idprod, label,orderid]);
+  Future deleteAlloc(
+      String idprod, String label, String orderid, String documentId) async {
+    String s = sprintf(_allocsPath, [idprod, label, orderid]);
     final CollectionReference _allocsCollectionReference =
         Firestore.instance.collection(s);
     await _allocsCollectionReference.document(documentId).delete();
   }
 
-
- //-----------
+  //-----------
 
   final StreamController<List<Alloc>> _allocsController =
       StreamController<List<Alloc>>.broadcast();
 
   Stream listenToAllocsRealTime(String idprod, String label, String orderid) {
-    String s = sprintf(_allocsPath, [idprod, label,orderid]);
+    String s = sprintf(_allocsPath, [idprod, label, orderid]);
     final CollectionReference _allocsCollectionReference =
         Firestore.instance.collection(s);
     // Register the handler for when the posts data changes
@@ -354,25 +474,20 @@ class FirestoreService {
         .orderBy('date', descending: true)
         .snapshots()
         .listen((allocsSnapshot) {
-    //  if (allocsSnapshot.documents.isNotEmpty) {
-        var allocs = allocsSnapshot.documents
-            .map(
-                (snapshot) => Alloc.fromMap(snapshot.data, snapshot.documentID))
-            .where((mappedItem) => mappedItem.allocid != null)
-            .toList();
+      //  if (allocsSnapshot.documents.isNotEmpty) {
+      var allocs = allocsSnapshot.documents
+          .map((snapshot) => Alloc.fromMap(snapshot.data, snapshot.documentID))
+          .where((mappedItem) => mappedItem.allocid != null)
+          .toList();
 
-        // Add the posts onto the controller
-        _allocsController.add(allocs);
-     // }
+      // Add the posts onto the controller
+      _allocsController.add(allocs);
+      // }
     }
-        // Return the stream underlying our _postsController.
-    
-    );
+            // Return the stream underlying our _postsController.
+
+            );
 
     return _allocsController.stream;
-
-
   }
-
-
 }

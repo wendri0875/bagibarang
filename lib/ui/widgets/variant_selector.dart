@@ -1,5 +1,7 @@
 import 'package:bagi_barang/models/product.dart';
 import 'package:bagi_barang/models/variant.dart';
+import 'package:bagi_barang/ui/shared/ui_helpers.dart';
+import 'package:bagi_barang/ui/widgets/input_field.dart';
 import 'package:bagi_barang/ui/widgets/varian_detail.dart';
 
 import 'package:bagi_barang/viewmodels/variant_model.dart';
@@ -23,30 +25,108 @@ class VariantGridSelector extends StatelessWidget {
     return ViewModelProvider<VariantModel>.withConsumer(
         viewModel: VariantModel(),
         onModelReady: (model) => model.listenToVariant(product.idprod),
-        builder: (context, model, child) => GridSelector<int>(
-              title: "SIZE",
-              items: _getVariant(model.variant),
-              onSelectionChanged: (option) {
-                Variant varian = model.variant.firstWhere(
-                    (vari) => vari.no == option,
-                    orElse: () => null);
-                //  print(varian.label);
-                _showModalBottomSheet(context, product, varian);
-              },
-              emptyView: Container(child: Text("No Varian")),
+        builder: (context, model, child) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    GridSelector<int>(
+                      title: "Varian",
+                      items: _getVariant(model.variant),
+                      onSelectionChanged: (option) {
+                        Variant varian = model.variant.firstWhere(
+                            (vari) => vari.no == option,
+                            orElse: () => null);
+                        //  print(varian.label);
+                        _showModalBottomSheet(context, product, varian);
+                      },
+                      emptyView: Container(child: Text("No Varian")),
+                    ),
+                    RaisedButton(
+                      textColor: Colors.white70,
+                      color: Colors.green,
+                      onPressed: (() {
+                        //     model.setEdittingAlloc(null);
+                        TextEditingController noController =
+                            TextEditingController();
+                        TextEditingController lblController =
+                            TextEditingController();
+
+                        int maxno = 1;
+                        if (model.variant != null && model.variant.isNotEmpty) {
+                          model.variant.sort((a, b) => a.no.compareTo(b.no));
+                          maxno = model.variant.last.no;
+                        }
+
+                        noController.text = maxno.toString();
+
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text("Varian"),
+                                content: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text('No'),
+                                    InputField(
+                                      controller: noController,
+                                      placeholder: "No",
+                                      textInputType: TextInputType.number,
+                                      smallVersion: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    Text('Label'),
+                                    InputField(
+                                      placeholder: 'Label',
+                                      controller: lblController,
+                                      smallVersion: true,
+                                    ),
+                                  ],
+                                ),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('Cancel'),
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                  ),
+                                  FlatButton(
+                                      child: Text('OK'),
+                                      onPressed: () {
+                                        //Navigator.of(context).pop(customController.text.toString());
+                                        Navigator.of(context).pop();
+                                        model.addVarian(
+                                            idprod: product.idprod,
+                                            no: int.tryParse(noController.text),
+                                            label: lblController.text,
+                                            price: product.pricestd,
+                                            weight: product.weightstd);
+
+                                        //_navigationService.pop();
+                                      })
+                                ],
+                              );
+                            });
+                      }),
+                      child: const Text('ADD VARIAN',
+                          style: TextStyle(fontSize: 20)),
+                    )
+                  ],
+                ),
+              ),
             ));
   }
 
   List<BaseGridSelectorItem> _getVariant(List documents) {
-
-    List<BaseGridSelectorItem> x=  documents != null
+    List<BaseGridSelectorItem> x = documents != null
         ? documents
-            .map((e) => BaseGridSelectorItem(
-                key: e.no, label: e.label))
+            .map((e) => BaseGridSelectorItem(key: e.no, label: e.label))
             .toList()
         : [];
 
-        return x;
+    return x;
   }
 }
 

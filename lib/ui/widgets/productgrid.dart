@@ -4,6 +4,7 @@ import 'package:bagi_barang/controls/DataHolder.dart';
 import 'package:bagi_barang/models/product.dart';
 import 'package:bagi_barang/pages/productDetail.dart';
 import 'package:bagi_barang/viewmodels/productgrid_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -60,8 +61,13 @@ class ProductGrid extends StatelessWidget {
                             crossAxisCount: 2),
                         itemBuilder: (BuildContext context, int index) {
                           //Product product = Product.fromSnapshot(snapshot.data.documents[index]);
-                          return SingleProduct(model:model,index: index
-                            //product: model.products[index]
+
+                          // model.getImageUrl(index).then((url) {
+                          //   debugPrint(url);
+                          // });
+
+                          return SingleProduct(model: model, index: index
+                              //product: model.products[index]
                               // prodName: snapshot.data.documents[index]['name'],
                               // prodPrice: snapshot.data.documents[index]['price'],
                               // prodImage: snapshot.data.documents[index]['image'],
@@ -94,57 +100,98 @@ class SingleProduct extends StatefulWidget {
   // final prodImage;
   // final prodPrice;
 
-  SingleProduct({this.model,this.index});
+  SingleProduct({this.model, this.index});
   @override
   _SingleProductState createState() => _SingleProductState();
 }
 
 class _SingleProductState extends State<SingleProduct> {
-  Uint8List imageFile;
+  // Uint8List imageFile;
 
-  StorageReference imageReference =
-      FirebaseStorage.instance.ref().child("prodimg");
+  // StorageReference imageReference =
+  //     FirebaseStorage.instance.ref().child("prodimg");
 
-  getimage() {
-    int maxsize = 7 * 1024 * 1024;
-    imageReference
-        .child(widget.model.products[widget.index].image)
-        .getData(maxsize)
-        .then((data) => {
-              this.setState(() {
-                imageFile = data;
-                imageData.putIfAbsent(widget.model.products[widget.index].image, () {
-                  return data;
-                });
-              })
-            })
-        .catchError((error) {
-      debugPrint(error);
+  // getimage() {
+  //   int maxsize = 7 * 1024 * 1024;
+  //   imageReference
+  //       .child(widget.model.products[widget.index].image)
+  //       .getData(maxsize)
+  //       .then((data) => {
+  //             this.setState(() {
+  //               imageFile = data;
+  //               imageData.putIfAbsent(widget.model.products[widget.index].image, () {
+  //                 return data;
+  //               });
+  //             })
+  //           })
+  //       .catchError((error) {
+  //     debugPrint(error);
+  //   });
+  // }
+
+  // Widget decideGridTileWidget() {
+  //   if (imageFile == null) {
+  //     return Image.asset('assets/placeholder.png');
+
+  //     // return Center(
+  //     //   child: Text("No Data"),
+  //     // );
+  //   } else {
+  //     return Image.memory(imageFile, fit: BoxFit.cover);
+  //   }
+  // }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   if (!imageData.containsKey(widget.model.products[widget.index].image)) {
+  //     getimage();
+  //   } else {
+  //     this.setState(() {
+  //       imageFile = imageData[widget.model.products[widget.index].image];
+  //     });
+  //   }
+  // }
+
+  var _tapPosition;
+
+  void _showCustomMenu(int index) {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
+
+    showMenu(
+            context: context,
+            items: <PopupMenuEntry<int>>[
+              new PopupMenuItem(child: Text('❌ Delete'), value: 0)
+            ],
+            position: RelativeRect.fromRect(
+                _tapPosition & Size(40, 40), // smaller rect, the touch area
+                Offset.zero & overlay.size // Bigger rect, the entire screen
+                ))
+        // This is how you handle user selection
+        .then<void>((int delta) {
+      // delta would be null if user taps on outside the popup menu
+      // (causing it to close without making selection)
+      if (delta == null) return;
+
+      widget.model.deleteProduct(index);
+
+      // setState(() {
+      //   _count = _count + delta;
+      // });
     });
+
+    // Another option:
+    //
+    // final delta = await showMenu(...);
+    //
+    // Then process `delta` however you want.
+    // Remember to make the surrounding function `async`, that is:
+    //
+    // void _showCustomMenu() async { ... }
   }
 
-  Widget decideGridTileWidget() {
-    if (imageFile == null) {
-      return Image.asset('assets/placeholder.png');
-      
-      // return Center(
-      //   child: Text("No Data"),
-      // );
-    } else {
-      return Image.memory(imageFile, fit: BoxFit.cover);
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (!imageData.containsKey(widget.model.products[widget.index].image)) {
-      getimage();
-    } else {
-      this.setState(() {
-        imageFile = imageData[widget.model.products[widget.index].image];
-      });
-    }
+  void _storePosition(TapDownDetails details) {
+    _tapPosition = details.globalPosition;
   }
 
   @override
@@ -158,8 +205,12 @@ class _SingleProductState extends State<SingleProduct> {
           tag: widget.model.products[widget.index].idprod,
           child: Material(
             child: InkWell(
+              // Have to remember it on tap-down.
+              onTapDown: _storePosition,
+              onLongPress:() { _showCustomMenu(widget.index); } ,
               onTap: () {
-                  widget.model.navigateToProductDetail(widget.model.products[widget.index].idprod, imageFile);
+                widget.model.navigateToProductDetail(
+                    widget.model.products[widget.index].idprod);
                 // Navigator.push(
                 //     context,
                 //     new MaterialPageRoute(
@@ -185,8 +236,13 @@ class _SingleProductState extends State<SingleProduct> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
+                  child: CachedNetworkImage(
+                    imageUrl: widget.model.products[widget.index].imageUrl,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  ),
                   //  child: Image.asset(widget.prodImage, fit: BoxFit.cover),
-                  child: decideGridTileWidget(),
+                  //child: decideGridTileWidget(),
                   // child: FadeInImage(
                   //     fit: BoxFit.cover,
                   //     placeholder: AssetImage('assets/placeholder.png'),

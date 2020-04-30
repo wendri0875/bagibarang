@@ -1,5 +1,6 @@
 import 'package:bagi_barang/constants/route_names.dart';
 import 'package:bagi_barang/ui/views/create_order_view.dart';
+import 'package:bagi_barang/ui/views/create_product_view.dart';
 import 'package:bagi_barang/ui/views/create_stock_view.dart';
 import 'package:bagi_barang/ui/views/home_view.dart';
 import 'package:bagi_barang/ui/views/login_view.dart';
@@ -44,6 +45,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           routeName: settings.name,
           arguments: settings.arguments,
           viewToShow: CreateStockView());
+
+    case CreateProductViewRoute:
+      return _getPageRoute(
+          routeName: settings.name,
+          arguments: settings.arguments,
+          viewToShow: CreateProductView());
 
     default:
       return MaterialPageRoute(

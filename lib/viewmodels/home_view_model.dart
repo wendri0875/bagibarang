@@ -38,5 +38,11 @@ class HomeViewModel extends BaseModel {
       );
     }
   }
+
+    void navigateToAddProduct()
+  {
+    _navigationService.navigateTo(CreateProductViewRoute);
+  }
+
  
 }

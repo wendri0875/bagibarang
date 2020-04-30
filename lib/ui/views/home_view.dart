@@ -152,7 +152,10 @@ class HomeView extends StatelessWidget {
           ),
           floatingActionButton: FloatingActionButton(
             //onPressed: _incrementCounter,
-            onPressed: () {},
+            onPressed: () {
+
+              model.navigateToAddProduct();
+            },
             tooltip: 'Increment',
             child: Icon(Icons.add),
           ),
