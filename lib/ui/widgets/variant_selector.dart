@@ -58,7 +58,7 @@ class VariantGridSelector extends StatelessWidget {
                           model.variant.sort((a, b) => a.no.compareTo(b.no));
                           maxno = model.variant.last.no;
                         }
-
+                        maxno++;
                         noController.text = maxno.toString();
 
                         showDialog(

@@ -1,3 +1,4 @@
+import 'package:bagi_barang/models/variant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Product {
@@ -9,6 +10,7 @@ class Product {
   final Timestamp uploaddate;
   final double weightstd;
   final String imageFileName;
+   List<Variant> variant;
 
   Product(
       {this.idprod,
@@ -18,7 +20,8 @@ class Product {
       this.pricestd,
       this.uploaddate,
       this.weightstd,
-      this.imageFileName});
+      this.imageFileName,
+      });
 
   Map<String, dynamic> toMap() {
     return {
@@ -45,6 +48,7 @@ class Product {
       pricestd: map["pricestd"].toDouble(),
       uploaddate: map["uploaddate"],
       weightstd: map["weightstd"].toDouble(),
+      
     );
   }
 }

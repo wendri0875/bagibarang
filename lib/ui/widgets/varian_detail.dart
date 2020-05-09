@@ -86,11 +86,10 @@ class VarianDetail extends StatelessWidget {
                     color: Colors.white38,
                     size: 40,
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 50),
-                    alignment: Alignment.topLeft,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text(
                           product.pname.toUpperCase(),
@@ -99,7 +98,24 @@ class VarianDetail extends StatelessWidget {
                               fontFamily: "MB",
                               fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 20),
+                        IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              model.deleteVarian(product.idprod, varian.label);
+                           //   Navigator.of(context).pop();
+                            })
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 50),
+                    alignment: Alignment.topLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
@@ -174,7 +190,9 @@ class VarianDetail extends StatelessWidget {
                                   SizedBox(height: 5),
                                   Text(
                                     f.format(model.ttlorder),
-                                    style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold),
                                   )
                                 ],
                               ),
@@ -189,7 +207,9 @@ class VarianDetail extends StatelessWidget {
                                   SizedBox(height: 5),
                                   Text(
                                     f.format(model.ttlstock),
-                                    style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold),
                                   )
                                 ],
                               ),
@@ -204,7 +224,9 @@ class VarianDetail extends StatelessWidget {
                                   SizedBox(height: 5),
                                   Text(
                                     f.format(model.ttlallocs),
-                                    style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold),
                                   )
                                 ],
                               )

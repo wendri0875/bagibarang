@@ -5,4 +5,5 @@ const String CreateProductViewRoute = "CreateProductView";
 const String ProductDetailRoute = "ProductDetailView";
 const String CreateOrderViewRoute = "CreateOrderView";
 const String CreateStockViewRoute = "CreateStockView";
+const String CreateInvoiceViewRoute = "CreateInvoiceView";
 // Generate the views here

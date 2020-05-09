@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bagi_barang/controls/sprintf.dart';
 import 'package:bagi_barang/models/alloc.dart';
+import 'package:bagi_barang/models/billable.dart';
 import 'package:bagi_barang/models/order.dart';
 import 'package:bagi_barang/models/product.dart';
 import 'package:bagi_barang/models/stock.dart';
@@ -50,6 +51,28 @@ class FirestoreService {
     }
   }
 
+  Future getProduct(String idprod) async {
+    try {
+      var data = await _productsCollectionReference.document(idprod).get();
+      return Product.fromMap(data.data, data.documentID);
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  Future getVarian(String idprod, String varian) async {
+    try {
+      String s = sprintf(_variantPath, [idprod]);
+
+      final CollectionReference _variantCollectionReference =
+          Firestore.instance.collection(s);
+      var data = await _variantCollectionReference.document(varian).get();
+      return Variant.fromMap(data.data, data.documentID);
+    } catch (e) {
+      return e.message;
+    }
+  }
+
   Stream listenToProductsRealTime() {
     // Register the handler for when the posts data changes
     _productsCollectionReference
@@ -58,8 +81,9 @@ class FirestoreService {
         .listen((productsSnapshot) {
       if (productsSnapshot.documents.isNotEmpty) {
         var products = productsSnapshot.documents
-            .map((snapshot) =>
-                Product.fromMap(snapshot.data, snapshot.documentID))
+            .map((snapshot) {
+              return Product.fromMap(snapshot.data, snapshot.documentID);
+            })
             .where((mappedItem) => mappedItem.idprod != null)
             .toList();
 
@@ -366,10 +390,19 @@ class FirestoreService {
   }
 
   Future deleteVarian(String idprod, String documentId) async {
-    String s = sprintf(_ordersPath, [idprod]);
+    String s = sprintf(_variantPath, [idprod]);
     final CollectionReference _variantCollectionReference =
         Firestore.instance.collection(s);
-    await _variantCollectionReference.document(documentId).delete();
+    try {
+      await _variantCollectionReference.document(documentId).delete();
+      return true;
+    } catch (e) {
+      if (e is PlatformException) {
+        return e.message;
+      }
+
+      return e.toString();
+    }
   }
 
   //----------------------------
@@ -489,5 +522,56 @@ class FirestoreService {
             );
 
     return _allocsController.stream;
+  }
+
+  //-----------
+
+  final StreamController<List<Order>> _billablesController =
+      StreamController<List<Order>>.broadcast();
+
+  Stream listenToBillablesRealTime({custid}) {
+    var _billablesCollectionReference =
+        Firestore.instance.collectionGroup('Orders');
+    // Register the handler for when the posts data changes
+
+    Query query = _billablesCollectionReference
+        .where('unshipped', isGreaterThan: 0)
+        .where("idcompany", isEqualTo: "Al-Hayya");
+
+    // if (custid != null && custid.isNotEmpty) {
+    //   query = query.where('custid', isEqualTo: custid);
+    // }
+    query.snapshots().listen((snapshot) async {
+      var orders = snapshot.documents
+          .map((snapshot) => Order.fromMap(snapshot.data, snapshot.documentID))
+          .toList();
+
+      // for (int i = 0; i < orders.length; ++i) {
+      //   CollectionReference _collectionReference;
+
+      //   //get product ref
+      //   _collectionReference = Firestore.instance.collection(_productPath);
+      //   await _collectionReference.document(orders[i].idprod).get().then(
+      //       (snapshot) => orders[i].pname =
+      //           Product.fromMap(snapshot.data, snapshot.documentID).pname);
+      //   //get varian ref
+      //   String s =
+      //       sprintf(_variantPath, [orders[i].idprod]);
+      //   _collectionReference = Firestore.instance.collection(s);
+      //  await _collectionReference.document(orders[i].varian).get().then((snapshot) {
+      //     Variant varian = Variant.fromMap(snapshot.data, snapshot.documentID);
+      //     orders[i].price = varian.price;
+      //     orders[i].weight = varian.weight;
+      //   });
+      // }
+
+      _billablesController.add(orders);
+    }
+        // }
+        // Return the stream underlying our _postsController.
+
+        );
+
+    return _billablesController.stream;
   }
 }

@@ -62,10 +62,10 @@ class VarianDetailModel extends BaseModel {
         _orders = updatedOrders;
         _ttlorder =
             updatedOrders.fold(0.0, (prev, next) => prev + next.orderqty ?? 0);
-        debugPrint("ttlorder = $_ttlorder");
+     //   debugPrint("ttlorder = $_ttlorder");
         _ttlallocs = updatedOrders.fold(
             0.0, (prev, next) => prev + next?.allocated ?? 0);
-        debugPrint("ttlallocs = $_ttlallocs");
+      //  debugPrint("ttlallocs = $_ttlallocs");
         notifyListeners();
       }
       setBusy(false);
@@ -200,5 +200,33 @@ class VarianDetailModel extends BaseModel {
       'label': label,
       'edittingStock': _stockcard[index]
     });
+  }
+
+  //-------------------
+  Future deleteVarian(String idprod, String label) async {
+    var dialogResponse = await _dialogService.showConfirmationDialog(
+      title: 'Are you sure?',
+      description: 'Do you really want to delete the stock?',
+      confirmationTitle: 'Yes',
+      cancelTitle: 'No',
+    );
+    var result;
+    if (dialogResponse.confirmed) {
+      setBusy(true);
+      result = await _firestoreService.deleteVarian(idprod, label);
+      setBusy(false);
+    }
+    if (result is String) {
+      await _dialogService.showDialog(
+        title: 'Could not delete Varian',
+        description: result,
+      );
+    } else {
+      _navigationService.pop();
+      // await _dialogService.showDialog(
+      //   title: 'Varian successfully delete',
+      //   description: 'Your varian has been created',
+      // );
+    }
   }
 }

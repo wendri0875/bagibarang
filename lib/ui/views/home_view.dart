@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:bagi_barang/models/billable.dart';
 import 'package:bagi_barang/services/authentication.dart';
+import 'package:bagi_barang/ui/widgets/billables.dart';
 
 import 'package:bagi_barang/viewmodels/home_view_model.dart';
 import 'package:bagi_barang/ui/widgets/products.dart';
@@ -103,9 +105,9 @@ class HomeView extends StatelessWidget {
               bottom: TabBar(
                 labelColor: Colors.black,
                 tabs: [
-                  Tab(icon: Icon(Icons.directions_car)),
-                  Tab(icon: Icon(Icons.directions_transit)),
-                  Tab(icon: Icon(Icons.directions_bike)),
+                  Tab(icon: Icon(Icons.home)),
+                  Tab(icon: Icon(Icons.shopping_cart)),
+                  Tab(icon: Icon(Icons.local_shipping)),
                 ],
               ),
               title: Text(title,
@@ -146,7 +148,7 @@ class HomeView extends StatelessWidget {
               // ),
               // // This trailing comma makes auto-formatting nicer for build methods.
 
-              Icon(Icons.directions_transit),
+              Billables(),
               Icon(Icons.directions_bike),
             ],
           ),
