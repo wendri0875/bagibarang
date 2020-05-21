@@ -78,12 +78,13 @@ class Order {
         custid: map["custid"],
         idprod: map["idprod"],
         varian: map["varian"],
-        orderdate: o == null ? "" : d.format(o),
+        orderdate: map["orderdate"],
+      //  orderdate: o == null ? "" : d.format(o),
         //orderqty: q == null ? "" : f.format(q),
-        orderqty: map["orderqty"],
-        allocated: map["allocated"] ?? 0,
+        orderqty: double.parse((map["orderqty"] ?? 0).toString()),
+        allocated: double.parse((map["allocated"] ?? 0).toString()),
         idcompany: map["idcompany"],
-        unshipped: map["unshipped"]);
+        unshipped: double.parse((map["unshipped"] ?? 0).toString()));
   }
 
   Map<String, dynamic> toMap() {
@@ -95,7 +96,7 @@ class Order {
       if (orderqty != null) 'orderqty': orderqty,
       if (allocated != null) 'allocated': allocated,
       if (idcompany != null) 'idcompany': idcompany,
-      if (unshipped != null) 'shipped': unshipped,
+      if (unshipped != null) 'unshipped': unshipped,
     };
   }
 }

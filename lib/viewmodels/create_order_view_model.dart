@@ -69,8 +69,17 @@ class CreateOrderViewModel extends BaseModel {
 
     if (!_editting) {
       //add
-      result = await _firestoreService.addOrder(idprod, label,
-          Order(custid: custid, orderqty: orderqty, orderdate: date));
+      result = await _firestoreService.addOrder(
+          idprod,
+          label,
+          Order(
+              custid: custid,
+              orderqty: orderqty,
+              orderdate: date,
+              idprod: idprod,
+              varian: label,
+              unshipped: orderqty,
+              idcompany: "Al-Hayya"));
     } else {
       //edit
       //cek orderqty vs ttlorderallocs
@@ -82,6 +91,7 @@ class CreateOrderViewModel extends BaseModel {
                 orderid: orderid,
                 custid: custid,
                 orderqty: orderqty,
+                unshipped: orderqty - (_edittingOrder.orderqty - _edittingOrder.unshipped),
                 //  orderdate: date,
                 allocated: _ttlorderalloc));
       } else {

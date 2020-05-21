@@ -1,8 +1,12 @@
 import 'dart:async';
 
 import 'package:bagi_barang/controls/sprintf.dart';
+import 'package:bagi_barang/models/address.dart';
 import 'package:bagi_barang/models/alloc.dart';
 import 'package:bagi_barang/models/billable.dart';
+import 'package:bagi_barang/models/customer.dart';
+import 'package:bagi_barang/models/invoice.dart';
+import 'package:bagi_barang/models/invoice_detail.dart';
 import 'package:bagi_barang/models/order.dart';
 import 'package:bagi_barang/models/product.dart';
 import 'package:bagi_barang/models/stock.dart';
@@ -25,11 +29,23 @@ class FirestoreService {
   final String _stockcardPath =
       'companies/Al-Hayya/Products/{{idprod}}/Variant/{{label}}/StockCard';
 
+  final String _addressesPath =
+      'companies/Al-Hayya/Customers/{{custid}}/Addresses';
+
+  final String _invoicesPath =
+      'companies/Al-Hayya/Invoices';
+
+final String _invoiceDetailsPath =
+      'companies/Al-Hayya/Invoices/{{invoiceid}}/InvoiceDetails';
+
   final CollectionReference _usersCollectionReference =
       Firestore.instance.collection("users");
 
   final CollectionReference _productsCollectionReference =
       Firestore.instance.collection('companies/Al-Hayya/Products');
+
+  final CollectionReference _customersCollectionReference =
+      Firestore.instance.collection('companies/Al-Hayya/Customers');
 
   final StreamController<List<Product>> _productsController =
       StreamController<List<Product>>.broadcast();
@@ -55,6 +71,39 @@ class FirestoreService {
     try {
       var data = await _productsCollectionReference.document(idprod).get();
       return Product.fromMap(data.data, data.documentID);
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  Future getCustomer(String custid) async {
+    try {
+      var cust = await _customersCollectionReference.document(custid).get();
+      return Customer.fromMap(cust.data, cust.documentID);
+      // .then((snapshot) {
+      //   if (snapshot != null) {
+      //     return Customer.fromMap(snapshot.data, snapshot.documentID);
+      //   }
+      //   return cust;
+      // });
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  Future getAddressList(String custid) async {
+    try {
+      String s = sprintf(_addressesPath, [custid]);
+      final CollectionReference _addressesCollectionReference =
+          Firestore.instance.collection(s);
+      var addresses =
+          _addressesCollectionReference.getDocuments().then((snapshot) {
+        return snapshot.documents
+            .map((e) => Address.fromMap(e.data, e.documentID))
+            .toList();
+      });
+
+      return addresses;
     } catch (e) {
       return e.message;
     }
@@ -282,6 +331,43 @@ class FirestoreService {
         Firestore.instance.collection(s);
     await _ordersCollectionReference.document(documentId).delete();
   }
+
+  //---------------------------- INVOICE
+
+  Future addInvoice( Invoice invoice) async {
+  
+    final CollectionReference _invoicesCollectionReference =
+        Firestore.instance.collection(_invoicesPath);
+
+    try {
+      var docref = await _invoicesCollectionReference.add(invoice.toMap());
+      return docref ;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  
+
+    //---------------------------- INVOICE DETAIL
+
+  Future addInvoiceDetail(String invoiceID, InvoiceDetail invoiceDetail) async {
+  
+         String s = sprintf(_invoiceDetailsPath, [invoiceID]);
+    final CollectionReference _invoicesCollectionReference =
+        Firestore.instance.collection(s);
+
+    try {
+      await _invoicesCollectionReference.add(invoiceDetail.toMap());
+      return true;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  
+
+  //-------------------------------
 
   Future addProduct(Product product) async {
     // String s = sprintf(_ordersPath, [idprod, label]);

@@ -54,12 +54,13 @@ class Orders extends ProviderWidget<VarianDetailModel> {
                         //  snapshot.data.documents[index]);
                         return GestureDetector(
                             onTap: () => model.navigateToEditOrder(
-                                idprod,
-                                label,
-                                index,
-                                model.ttlorder,
-                                model.ttlstock,
-                                model.ttlallocs),
+                                  idprod,
+                                  label,
+                                  index,
+                                  model.ttlorder,
+                                  model.ttlstock,
+                                  model.ttlallocs,
+                                ),
                             child: SingleOrder(
                               order: model.orders[index],
                               onDeleteItem: () =>
@@ -132,7 +133,9 @@ class _SingleOrderState extends State<SingleOrder> {
     var f = new NumberFormat("#,###.#");
     var orderqty =
         widget.order.orderqty == null ? "" : f.format(widget.order.orderqty);
-
+    final d = new DateFormat('dd MMM');
+    DateTime o = widget.order.orderdate.toDate() ?? null;
+    var orderdate = d.format(o);
     return Card(
       color: Colors.white70,
       child: ListTile(
@@ -146,7 +149,7 @@ class _SingleOrderState extends State<SingleOrder> {
         ),
         title: Text(widget.order.custid,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        subtitle: Text(widget.order.orderdate),
+        subtitle: Text(orderdate),
         trailing: Container(
           width: 100,
           child: Column(
@@ -158,7 +161,7 @@ class _SingleOrderState extends State<SingleOrder> {
               SizedBox(
                 height: 5,
               ),
-              ((widget.order?.allocated ?? 0)==0)
+              ((widget.order?.allocated ?? 0) == 0)
                   ? SizedBox()
                   : Text("🛒" + f.format(widget.order.allocated),
                       style: TextStyle(fontSize: 15)),

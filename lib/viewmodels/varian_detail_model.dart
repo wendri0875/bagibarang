@@ -52,6 +52,7 @@ class VarianDetailModel extends BaseModel {
   double _ttlallocs = 0.0;
   double get ttlallocs => _ttlallocs;
 
+
   void listenToOrders(String idprod, String label) {
     setBusy(true);
     _firestoreService

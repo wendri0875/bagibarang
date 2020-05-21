@@ -99,7 +99,8 @@ class CreateOrderView extends StatelessWidget {
                           idprod: idprod,
                           label: label,
                           custid: customerController.text,
-                          orderqty: double.tryParse(qtyController.text));
+                          orderqty: double.tryParse(qtyController.text)
+                          );
                   },
                 )
               ],

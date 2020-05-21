@@ -16,7 +16,7 @@ class BillablesModel extends BaseModel {
 
   final NavigationService _navigationService = locator<NavigationService>();
 
-  List<Billable> _billables = List<Billable>();
+  List<Billable> _billables;
   List<Billable> get billables => _billables;
 
   List<Order> _orders;
@@ -25,16 +25,14 @@ class BillablesModel extends BaseModel {
   List<Product> _products = List<Product>();
   List<Product> get products => _products;
 
-
-
   void listenToGroupedBillables() {
     setBusy(true);
     _firestoreService.listenToBillablesRealTime().listen((dataOrder) {
       List<Order> updatedOrders = dataOrder;
       if (updatedOrders != null && updatedOrders.length > 0) {
         _orders = updatedOrders;
-
-          //groupby
+        _billables = List<Billable>();
+        //groupby
         Map<String, dynamic> a = groupBy(updatedOrders, (e) => e.custid)
             .map((key, value) => MapEntry(key, value.length));
 
@@ -51,10 +49,11 @@ class BillablesModel extends BaseModel {
   }
 
   void navigateToCartDetail(int index) {
-
     List<Order> custOrders;
-    custOrders = _orders.where((element) => element.custid==_billables[index].custid).toList();
-    
+    custOrders = _orders
+        .where((element) => element.custid == _billables[index].custid)
+        .toList();
+
     _navigationService.navigateTo(CreateInvoiceViewRoute,
         arguments: {'custorders': custOrders});
   }
