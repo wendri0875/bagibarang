@@ -3,7 +3,6 @@ import 'package:bagi_barang/ui/shared/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-
 import 'note_text.dart';
 
 class InputField extends StatefulWidget {
@@ -15,6 +14,7 @@ class InputField extends StatefulWidget {
   final String validationMessage;
   final Function enterPressed;
   final bool smallVersion;
+  final bool noteVersion;
   final FocusNode fieldFocusNode;
   final FocusNode nextFocusNode;
   final TextInputAction textInputAction;
@@ -36,7 +36,8 @@ class InputField extends StatefulWidget {
       this.textInputType = TextInputType.text,
       this.password = false,
       this.isReadOnly = false,
-      this.smallVersion = false});
+      this.smallVersion = false,
+      this.noteVersion = false});
 
   @override
   _InputFieldState createState() => _InputFieldState();
@@ -59,7 +60,8 @@ class _InputFieldState extends State<InputField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          height: widget.smallVersion ? 40 : fieldHeight,
+          height:
+              widget.smallVersion ? 40 : widget.noteVersion ? 80 : fieldHeight,
           alignment: Alignment.centerLeft,
           padding: fieldPadding,
           decoration:
@@ -69,9 +71,13 @@ class _InputFieldState extends State<InputField> {
               Expanded(
                 child: TextFormField(
                   controller: widget.controller,
-                  keyboardType: widget.textInputType,
+                  keyboardType: widget.noteVersion
+                      ? TextInputType.multiline
+                      : widget.textInputType,
                   focusNode: widget.fieldFocusNode,
                   textInputAction: widget.textInputAction,
+                  minLines: null,
+                  maxLines: null,
                   onChanged: widget.onChanged,
                   inputFormatters:
                       widget.formatter != null ? [widget.formatter] : null,

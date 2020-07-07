@@ -1,3 +1,4 @@
+import 'package:bagi_barang/ui/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 
 // Box Decorations
@@ -19,5 +20,21 @@ const EdgeInsets largeFieldPadding =
     const EdgeInsets.symmetric(horizontal: 15, vertical: 15);
 
 // Text Variables
-const TextStyle buttonTitleTextStyle =
-    const TextStyle(fontWeight: FontWeight.w700, color: Colors.white);
+const TextStyle buttonTitleTextStyle = const TextStyle(
+    fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20);
+
+const TextStyle headerTextStyle = const TextStyle(fontWeight: FontWeight.bold);
+
+const TextStyle importantTextStyle =
+    const TextStyle(fontWeight: FontWeight.bold, color: importantColor);
+
+const TextStyle hiperLinkTextStyle = const TextStyle(
+    decoration: TextDecoration.underline,
+    fontWeight: FontWeight.bold,
+    color: accentColor);
+
+const TextStyle blackBigBoldTextStyle = const TextStyle(
+    fontWeight: FontWeight.bold, color: Colors.black, fontSize: 20);
+
+const TextStyle redBigBoldTextStyle = const TextStyle(
+    fontWeight: FontWeight.bold, color: Colors.red, fontSize: 20);

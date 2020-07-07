@@ -1,16 +1,13 @@
 import 'package:bagi_barang/models/billable.dart';
-import 'package:bagi_barang/ui/views/create_invoice_view.dart';
-
 import 'package:bagi_barang/viewmodels/billables_model.dart';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider_architecture/provider_architecture.dart';
 
 
 
-class Billables extends StatelessWidget {
-  Billables({Key key}) : super(key: key);
+class BillablesView extends StatelessWidget {
+  BillablesView({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +144,7 @@ class _SingleBillableState extends State<SingleBillable> {
           children: <Widget>[
             Text(qty,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            Text("Product")
+            Text("Items")
           ],
         ),
       ),

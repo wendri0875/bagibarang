@@ -1,12 +1,9 @@
 import 'dart:ui';
-
-import 'package:bagi_barang/models/billable.dart';
-import 'package:bagi_barang/services/authentication.dart';
-import 'package:bagi_barang/ui/widgets/billables.dart';
-
+import 'package:bagi_barang/ui/views/billables_view.dart';
+import 'package:bagi_barang/ui/views/invoice_list_view.dart';
+import 'package:bagi_barang/ui/views/pending_order_view.dart';
 import 'package:bagi_barang/viewmodels/home_view_model.dart';
 import 'package:bagi_barang/ui/widgets/products.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider_architecture/viewmodel_provider.dart';
 
@@ -91,7 +88,7 @@ class HomeView extends StatelessWidget {
       viewModel: HomeViewModel(),
       // onModelReady: (model) => model.handleStartUpLogic(),
       builder: (context, model, child) => DefaultTabController(
-        length: 3,
+        length: 4,
         child: Scaffold(
           drawer: Theme(
               data: Theme.of(context).copyWith(
@@ -105,9 +102,13 @@ class HomeView extends StatelessWidget {
               bottom: TabBar(
                 labelColor: Colors.black,
                 tabs: [
-                  Tab(icon: Icon(Icons.home)),
-                  Tab(icon: Icon(Icons.shopping_cart)),
-                  Tab(icon: Icon(Icons.local_shipping)),
+                  Tab(
+                    icon: Icon(Icons.home),
+                    text: "Home",
+                  ),
+                  Tab(icon: Icon(Icons.alarm), text: "Pending"),
+                  Tab(icon: Icon(Icons.shopping_cart), text: "Cart"),
+                  Tab(icon: Icon(Icons.attach_money), text: "Nota"),
                 ],
               ),
               title: Text(title,
@@ -116,6 +117,7 @@ class HomeView extends StatelessWidget {
           body: TabBarView(
             children: [
               Products(),
+              PendingOrderView(),
               // Center(
               //   // Center is a layout widget. It takes a single child and positions it
               //   // in the middle of the parent.
@@ -148,14 +150,13 @@ class HomeView extends StatelessWidget {
               // ),
               // // This trailing comma makes auto-formatting nicer for build methods.
 
-              Billables(),
-              Icon(Icons.directions_bike),
+              BillablesView(),
+              InvoiceListView(),
             ],
           ),
           floatingActionButton: FloatingActionButton(
             //onPressed: _incrementCounter,
             onPressed: () {
-
               model.navigateToAddProduct();
             },
             tooltip: 'Increment',

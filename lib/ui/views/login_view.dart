@@ -1,3 +1,4 @@
+import 'package:bagi_barang/ui/shared/shared_styles.dart';
 import 'package:bagi_barang/ui/shared/ui_helpers.dart';
 import 'package:bagi_barang/ui/widgets/busy_button.dart';
 import 'package:bagi_barang/ui/widgets/input_field.dart';
@@ -23,7 +24,10 @@ class LoginView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         BusyButton(
-                          title: 'Login',
+                          child: Text(
+                            'Login',
+                            style: buttonTitleTextStyle,
+                          ),
                           busy: model.busy,
                           onPressed: () {
                             model.login();

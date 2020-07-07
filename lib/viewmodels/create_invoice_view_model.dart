@@ -1,3 +1,6 @@
+import 'package:bagi_barang/constants/route_names.dart';
+import 'package:bagi_barang/models/address.dart';
+import 'package:bagi_barang/models/alloc.dart';
 import 'package:bagi_barang/models/billable.dart';
 import 'package:bagi_barang/models/customer.dart';
 import 'package:bagi_barang/models/invoice.dart';
@@ -22,8 +25,8 @@ class CreateInvoiceViewModel extends BaseModel {
   List<Billable> _billables = List<Billable>();
   List<Billable> get billables => _billables;
 
-  List<Order> _updatedOrders;
-  List<Order> get orders => _updatedOrders;
+  List<Alloc> _updatedAllocs;
+  List<Alloc> get allocs => _updatedAllocs;
 
   Invoice _invoice = Invoice();
   Invoice get invoice => _invoice;
@@ -49,15 +52,15 @@ class CreateInvoiceViewModel extends BaseModel {
   double _total = 0.0;
   double get total => _total;
 
-  void getRefFilledBillableCustOrders(List<Order> custorders) {
+  void getRefFilledBillableCustOrders(List<Alloc> custallocs) {
     setBusy(true);
     //_firestoreService.listenToBillablesRealTime().listen((dataOrder) {
     // List<Order> updatedOrders = dataOrder;
-    if (custorders != null && custorders.length > 0) {
-      _updatedOrders = custorders;
+    if (custallocs != null && custallocs.length > 0) {
+      _updatedAllocs = custallocs;
 
 //order to invoice
-      _invoice.custid = custorders[0].custid;
+      _invoice.custid = custallocs[0].custid;
 // get customer object
       _firestoreService.getCustomer(_invoice.custid).then((customer) {
         if (customer != null) {
@@ -74,12 +77,28 @@ class CreateInvoiceViewModel extends BaseModel {
         }
       });
 
+      // get default addresss
+      _firestoreService.getDefltAddress(_invoice.custid).then((address) {
+        if (address != null) {
+          _invoice.addressid = address.addressid;
+          _invoice.recipient = address.recipient;
+          _invoice.address = address.address;
+          _invoice.phone = address.phone;
+          _invoice.deflt = address.deflt;
+
+          notifyListeners();
+        }
+      });
+
 //order to invoice detail
       _invoiceDetails =
-          custorders.map((e) => InvoiceDetail.fromOrder(e)).toList();
+          custallocs.map((e) => InvoiceDetail.fromAlloc(e)).toList();
 
       //get reference collection (pengganti join spt sql)
-      var idprods = custorders.map((e) => e.idprod).toSet().toList();
+
+      //get all orders from list of allocs
+
+      var idprods = custallocs.map((e) => e.idprod).toSet().toList();
 
       idprods.forEach((idprod) {
         _firestoreService.getProduct(idprod).then((product) {
@@ -102,7 +121,7 @@ class CreateInvoiceViewModel extends BaseModel {
           //order.pname = prod.pname;
 
           //get varian
-          var prodvariant = custorders
+          var prodvariant = custallocs
               .where((element) => element.idprod == prod.idprod)
               .map((e) => e.varian)
               .toSet()
@@ -193,17 +212,33 @@ class CreateInvoiceViewModel extends BaseModel {
   }
 
   void updateTotal() {
-    _subtotal = _invoiceDetails.fold(0.0, (prev, next) => prev + next.linettl);
+    _subtotal =
+        _invoiceDetails.fold(0.0, (prev, next) => prev + next?.linettl ?? 0);
     _ttlweight =
-        _invoiceDetails.fold(0.0, (prev, next) => prev + next.lineweight);
+        _invoiceDetails.fold(0.0, (prev, next) => prev + next?.lineweight ?? 0);
 
     _total = _subtotal +
-        double.parse((_invoice?.adjustment ?? 0).toString()) +
-        double.parse((_invoice?.ongkir ?? 0).toString());
+        double.parse((_invoice?.correction ?? 0).toString()) +
+        double.parse((_invoice?.postage ?? 0).toString());
 
     _invoice.subtotal = _subtotal;
     _invoice.ttlweight = _ttlweight;
     _invoice.total = _total;
+    _invoice.ttlitem = _invoiceDetails?.length ?? 0;
+  }
+
+  void setCorrection(double correction) {
+    _invoice.correction = correction ?? 0;
+    updateTotal();
+    notifyListeners();
+  }
+
+  
+
+  void setPostage(double postage) {
+    _invoice.postage = postage ?? 0;
+    updateTotal();
+    notifyListeners();
   }
 
   Future addInvoice() async {
@@ -211,6 +246,7 @@ class CreateInvoiceViewModel extends BaseModel {
 
     Timestamp date = Timestamp.fromDate(DateTime.now());
     _invoice.date = date;
+    _invoice.status = 1;
 
     var result;
     //add
@@ -234,14 +270,14 @@ class CreateInvoiceViewModel extends BaseModel {
             description: result,
           );
           return;
-        }
-        else{
-            //kalau berhasil update shipped di order
-            
-          Order order = _updatedOrders.firstWhere((element) => element.orderid==invoiceDetail.orderid);
-          order.unshipped -= invoiceDetail.qty;
-          _firestoreService.updateOrder(order.idprod, order.varian, order);
-          
+        } else {
+          //kalau berhasil update shipped di order
+
+          Alloc alloc = _updatedAllocs.firstWhere(
+              (element) => element.orderid == invoiceDetail.orderid);
+          alloc.unshipped -= invoiceDetail.qty;
+          _firestoreService.updateAlloc(
+              alloc.idprod, alloc.varian, alloc.orderid, alloc);
         }
       });
 
@@ -259,5 +295,20 @@ class CreateInvoiceViewModel extends BaseModel {
     }
     setBusy(false);
     _navigationService.pop();
+  }
+
+  Future<void> navigateToChooseAddress(
+      String custid, String currAddressid) async {
+    Address address = await _navigationService.navigateTo(
+        ChooseAddressViewRoute,
+        arguments: {'custid': custid, 'currAddressid': currAddressid});
+    if (address != null) {
+      _invoice.addressid = address.addressid;
+      _invoice.recipient = address.recipient;
+      _invoice.address = address.address;
+      _invoice.phone = address.phone;
+      _invoice.deflt = address.deflt;
+      notifyListeners();
+    }
   }
 }

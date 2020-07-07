@@ -1,3 +1,4 @@
+import 'package:bagi_barang/ui/shared/shared_styles.dart';
 import 'package:bagi_barang/ui/shared/ui_helpers.dart';
 import 'package:bagi_barang/ui/widgets/busy_button.dart';
 import 'package:bagi_barang/ui/widgets/input_field.dart';
@@ -5,7 +6,6 @@ import 'package:bagi_barang/viewmodels/signup_view_model.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider_architecture/provider_architecture.dart';
-
 
 class SignUpView extends StatelessWidget {
   final emailController = TextEditingController();
@@ -48,7 +48,12 @@ class SignUpView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   BusyButton(
-                    title: 'Sign Up',
+                    busy: model.busy,
+                    child: Text(
+                      'Sign Up',
+                      style: buttonTitleTextStyle,
+                    ),
+                    // title: 'Sign Up',
                     onPressed: () {
                       // TODO: Perform firebase login here
                     },

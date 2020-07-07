@@ -9,10 +9,12 @@ import 'package:bagi_barang/models/invoice.dart';
 import 'package:bagi_barang/models/invoice_detail.dart';
 import 'package:bagi_barang/models/order.dart';
 import 'package:bagi_barang/models/product.dart';
+import 'package:bagi_barang/models/detailstatus.dart';
 import 'package:bagi_barang/models/stock.dart';
 import 'package:bagi_barang/models/user.dart';
 import 'package:bagi_barang/models/variant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class FirestoreService {
@@ -32,11 +34,13 @@ class FirestoreService {
   final String _addressesPath =
       'companies/Al-Hayya/Customers/{{custid}}/Addresses';
 
-  final String _invoicesPath =
-      'companies/Al-Hayya/Invoices';
+  final String _invoicesPath = 'companies/Al-Hayya/Invoices';
 
-final String _invoiceDetailsPath =
+  final String _invoiceDetailsPath =
       'companies/Al-Hayya/Invoices/{{invoiceid}}/InvoiceDetails';
+
+  final String _detailStatusesPath =
+      'companies/Al-Hayya/Invoices/{{invoiceid}}/DetailStatuses';
 
   final CollectionReference _usersCollectionReference =
       Firestore.instance.collection("users");
@@ -91,19 +95,18 @@ final String _invoiceDetailsPath =
     }
   }
 
-  Future getAddressList(String custid) async {
+  Future<Address> getDefltAddress(String custid) async {
     try {
       String s = sprintf(_addressesPath, [custid]);
       final CollectionReference _addressesCollectionReference =
           Firestore.instance.collection(s);
-      var addresses =
-          _addressesCollectionReference.getDocuments().then((snapshot) {
-        return snapshot.documents
-            .map((e) => Address.fromMap(e.data, e.documentID))
-            .toList();
-      });
 
-      return addresses;
+      Query query =
+          _addressesCollectionReference.where('deflt', isEqualTo: true);
+
+      var addresses = await query.getDocuments();
+      return Address.fromMap(
+          addresses.documents[0].data, addresses.documents[0].documentID);
     } catch (e) {
       return e.message;
     }
@@ -332,41 +335,6 @@ final String _invoiceDetailsPath =
     await _ordersCollectionReference.document(documentId).delete();
   }
 
-  //---------------------------- INVOICE
-
-  Future addInvoice( Invoice invoice) async {
-  
-    final CollectionReference _invoicesCollectionReference =
-        Firestore.instance.collection(_invoicesPath);
-
-    try {
-      var docref = await _invoicesCollectionReference.add(invoice.toMap());
-      return docref ;
-    } catch (e) {
-      return e.toString();
-    }
-  }
-
-  
-
-    //---------------------------- INVOICE DETAIL
-
-  Future addInvoiceDetail(String invoiceID, InvoiceDetail invoiceDetail) async {
-  
-         String s = sprintf(_invoiceDetailsPath, [invoiceID]);
-    final CollectionReference _invoicesCollectionReference =
-        Firestore.instance.collection(s);
-
-    try {
-      await _invoicesCollectionReference.add(invoiceDetail.toMap());
-      return true;
-    } catch (e) {
-      return e.toString();
-    }
-  }
-
-  
-
   //-------------------------------
 
   Future addProduct(Product product) async {
@@ -491,6 +459,31 @@ final String _invoiceDetailsPath =
     }
   }
 
+//----------------STOCK-------------------
+
+  Future deleteStockCancelation(
+      String idprod, String label, String invoicedetailid) async {
+    try {
+      String s = sprintf(_stockcardPath, [idprod, label]);
+      final CollectionReference _stockcardCollectionReference =
+          Firestore.instance.collection(s);
+
+      Query query = _stockcardCollectionReference.where('note',
+          isEqualTo: invoicedetailid);
+
+      var stocks = await query.getDocuments();
+
+      if (stocks.documents.length > 0) {
+        var stockid = stocks.documents[0].documentID;
+        await _stockcardCollectionReference.document(stockid).delete();
+      }
+
+      return true;
+    } catch (e) {
+      return e.message;
+    }
+  }
+
   //----------------------------
   Future deleteStock(String idprod, String label, String documentId) async {
     String s = sprintf(_stockcardPath, [idprod, label]);
@@ -581,6 +574,17 @@ final String _invoiceDetailsPath =
 
   //-----------
 
+  Future getAlloc(
+      String idprod, String label, String orderid, String allocid) async {
+    String s = sprintf(_allocsPath, [idprod, label, orderid]);
+    final CollectionReference _allocsCollectionReference =
+        Firestore.instance.collection(s);
+
+    var alloc = await _allocsCollectionReference.document(allocid).get();
+    return Alloc.fromMap(alloc.data, alloc.documentID);
+  }
+
+//----------
   final StreamController<List<Alloc>> _allocsController =
       StreamController<List<Alloc>>.broadcast();
 
@@ -612,12 +616,12 @@ final String _invoiceDetailsPath =
 
   //-----------
 
-  final StreamController<List<Order>> _billablesController =
-      StreamController<List<Order>>.broadcast();
+  final StreamController<List<Alloc>> _billablesController =
+      StreamController<List<Alloc>>.broadcast();
 
   Stream listenToBillablesRealTime({custid}) {
     var _billablesCollectionReference =
-        Firestore.instance.collectionGroup('Orders');
+        Firestore.instance.collectionGroup('Allocation');
     // Register the handler for when the posts data changes
 
     Query query = _billablesCollectionReference
@@ -628,8 +632,8 @@ final String _invoiceDetailsPath =
     //   query = query.where('custid', isEqualTo: custid);
     // }
     query.snapshots().listen((snapshot) async {
-      var orders = snapshot.documents
-          .map((snapshot) => Order.fromMap(snapshot.data, snapshot.documentID))
+      var unshippedallocs = snapshot.documents
+          .map((snapshot) => Alloc.fromMap(snapshot.data, snapshot.documentID))
           .toList();
 
       // for (int i = 0; i < orders.length; ++i) {
@@ -651,7 +655,7 @@ final String _invoiceDetailsPath =
       //   });
       // }
 
-      _billablesController.add(orders);
+      _billablesController.add(unshippedallocs);
     }
         // }
         // Return the stream underlying our _postsController.
@@ -659,5 +663,400 @@ final String _invoiceDetailsPath =
         );
 
     return _billablesController.stream;
+  }
+
+//----- ADDRESSS---------------------------------------
+
+//-------Addresslisten
+
+  final StreamController<List<Address>> _addressController =
+      StreamController<List<Address>>.broadcast();
+
+  Stream listenToAddressesRealTime(String custid) {
+    String s = sprintf(_addressesPath, [custid]);
+    final CollectionReference _addressesCollectionReference =
+        Firestore.instance.collection(s);
+
+    // Register the handler for when the posts data changes
+    _addressesCollectionReference
+        //   .orderBy('deflt', descending: true)
+        .snapshots()
+        .listen((addressesSnapshot) {
+      //  if (allocsSnapshot.documents.isNotEmpty) {
+      var addresses = addressesSnapshot.documents
+          .map(
+              (snapshot) => Address.fromMap(snapshot.data, snapshot.documentID))
+          .where((mappedItem) => mappedItem.addressid != null)
+          .toList();
+      // Add the posts onto the controller
+      _addressController.add(addresses);
+      // }
+    }
+            // Return the stream underlying our _postsController.
+
+            );
+
+    return _addressController.stream;
+  }
+
+  //-----------------------
+  Future addAddress(String custid, Address addr) async {
+    String s = sprintf(_addressesPath, [custid]);
+
+    final CollectionReference _addressCollectionReference =
+        Firestore.instance.collection(s);
+
+    try {
+      await _addressCollectionReference
+          .document(addr.addressid)
+          .setData(addr.toMap());
+
+      return true;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future updateAddress(String custid, Address addr) async {
+    String s = sprintf(_addressesPath, [custid]);
+    final CollectionReference _addressCollectionReference =
+        Firestore.instance.collection(s);
+
+    try {
+      await _addressCollectionReference
+          .document(addr.addressid)
+          .updateData(addr.toMap());
+      return true;
+    } catch (e) {
+      if (e is PlatformException) {
+        return e.message;
+      }
+
+      return e.toString();
+    }
+  }
+
+  Future deleteAddress(String custid, String documentId) async {
+    String s = sprintf(_addressesPath, [custid]);
+    final CollectionReference _addressCollectionReference =
+        Firestore.instance.collection(s);
+    await _addressCollectionReference.document(documentId).delete();
+  }
+
+  Future setDefaultAddress(
+      String custid, List<Address> addresses, String documentId) async {
+    String s = sprintf(_addressesPath, [custid]);
+    final CollectionReference _addressCollectionReference =
+        Firestore.instance.collection(s);
+
+    addresses.forEach((address) async {
+      if (address.addressid == documentId)
+        await _addressCollectionReference
+            .document(address.addressid)
+            .updateData({'deflt': true});
+      else
+        await _addressCollectionReference
+            .document(address.addressid)
+            .updateData({'deflt': false});
+    });
+
+//multi update
+//QuerySnapshot eventsQuery =  await _addressCollectionReference.where('idTo', isEqualTo: id).where('isSeen', isEqualTo: 0).getDocuments();
+
+    // QuerySnapshot eventsQuery =
+    //     await _addressCollectionReference.getDocuments();
+
+    // eventsQuery.documents.forEach((msgDoc) {
+    //   if (msgDoc.reference.documentID == documentId)
+    //     msgDoc.reference.updateData({'deflt': true});
+    //   else
+    //     msgDoc.reference.updateData({'deflt': false});
+    // });
+  }
+
+//----- SEARCH PENDING ORDER---------------------------------------
+
+  final StreamController<List<Order>> _pendingorderController =
+      StreamController<List<Order>>.broadcast();
+
+  Stream listenToPendingOrderRealTime(String searchstr) {
+    var _pendingOrderCollectionReference =
+        Firestore.instance.collectionGroup('Orders');
+
+    Query query = _pendingOrderCollectionReference
+        .where("idcompany", isEqualTo: "Al-Hayya")
+        .where('pending', isEqualTo: true)
+        .where('custid', isGreaterThanOrEqualTo: searchstr)
+        .where('custid', isLessThan: searchstr + 'z');
+
+    query.snapshots().listen((snapshot) async {
+      var unshippedallocs = snapshot.documents
+          .map((snapshot) => Order.fromMap(snapshot.data, snapshot.documentID))
+          .toList();
+
+      // Add the posts onto the controller
+      _pendingorderController.add(unshippedallocs);
+      // }
+    }
+        // Return the stream underlying our _postsController.
+
+        );
+
+    return _pendingorderController.stream;
+  }
+
+//-------------------------- INVOICE---------------------------------------
+
+  Future addInvoice(Invoice invoice) async {
+    final CollectionReference _invoicesCollectionReference =
+        Firestore.instance.collection(_invoicesPath);
+
+    var invid = await createInvoiceID(invoice);
+    try {
+      await _invoicesCollectionReference
+          .document(invid)
+          .setData(invoice.toMap());
+
+      // var docref = await _invoicesCollectionReference.add(invoice.toMap());
+      return _invoicesCollectionReference.document(invid);
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future createInvoiceID(Invoice invoice) async {
+    int autonumber = 1;
+
+    Timestamp date = Timestamp.fromDate(DateTime.now());
+
+    final CollectionReference _invoicesCollectionReference =
+        Firestore.instance.collection(_invoicesPath);
+    // Register the handler for when the posts data changes
+    var invoices = await _invoicesCollectionReference
+        .where('date', isEqualTo: date)
+        .getDocuments();
+
+    if (invoices.documents.length > 0) {
+      autonumber = invoices.documents.length + 1;
+    }
+
+    String id = invoice.custid +
+        "." +
+        DateTime.now().year.toString() +
+        "." +
+        DateTime.now().month.toString() +
+        "." +
+        autonumber.toString();
+    return id;
+  }
+
+  Future updateInvoice(Invoice invoice) async {
+    final CollectionReference _invoicesCollectionReference =
+        Firestore.instance.collection(_invoicesPath);
+
+    try {
+      await _invoicesCollectionReference
+          .document(invoice.invoiceid)
+          .updateData(invoice.toMap());
+
+      // var docref = await _invoicesCollectionReference.add(invoice.toMap());
+      return _invoicesCollectionReference.document(invoice.invoiceid);
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future delInvoice(String invoiceid) async {
+    //get invoice detail ref
+
+    String s = sprintf(_invoiceDetailsPath, [invoiceid]);
+    final CollectionReference _invoiceDetailCollectionReference =
+        Firestore.instance.collection(s);
+
+    _invoiceDetailCollectionReference
+        .getDocuments()
+        .then((querysnapshot) async {
+      querysnapshot.documents.forEach((doc) async {
+        var invdet = InvoiceDetail.fromMap(doc.data, doc.documentID);
+        Alloc alloc = await getAlloc(
+            invdet.idprod, invdet.varian, invdet.orderid, invdet.allocid);
+
+        if (alloc != null) {
+          await updateAlloc(
+              invdet.idprod,
+              invdet.varian,
+              invdet.orderid,
+              Alloc(
+                  allocid: alloc.allocid,
+                  unshipped: alloc.unshipped += invdet.qty));
+        }
+        await doc.reference.delete();
+      });
+    });
+    final CollectionReference _invoicesCollectionReference =
+        Firestore.instance.collection(_invoicesPath);
+
+    try {
+      await _invoicesCollectionReference.document(invoiceid).delete();
+      return true;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  //---------------------------- INVOICE DETAIL
+
+  Future addInvoiceDetail(String invoiceID, InvoiceDetail invoiceDetail) async {
+    String s = sprintf(_invoiceDetailsPath, [invoiceID]);
+    final CollectionReference _invoicesCollectionReference =
+        Firestore.instance.collection(s);
+
+    try {
+      invoiceDetail.invoiceid = invoiceID;
+      await _invoicesCollectionReference.add(invoiceDetail.toMap());
+      return true;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  final StreamController<List<Invoice>> _invoiceListController =
+      StreamController<List<Invoice>>.broadcast();
+
+  Stream listenToInvoiceListRealTime(String searchstr) {
+    String s = _invoicesPath;
+    final CollectionReference _invoiceCollectionReference =
+        Firestore.instance.collection(s);
+
+    Query query = _invoiceCollectionReference
+        .where('custid', isGreaterThanOrEqualTo: searchstr)
+        .where('custid', isLessThan: searchstr + 'z');
+
+    query.snapshots().listen((snapshot) async {
+      var invoices = snapshot.documents
+          .map(
+              (snapshot) => Invoice.fromMap(snapshot.data, snapshot.documentID))
+          .toList();
+
+      // Add the posts onto the controller
+      _invoiceListController.add(invoices);
+      // }
+    }
+        // Return the stream underlying our _postsController.
+
+        );
+
+    return _invoiceListController.stream;
+  }
+
+  final StreamController<Invoice> _invoiceController =
+      StreamController<Invoice>.broadcast();
+
+  Stream listenToInvoiceDocumentRealTime(String invoiceid) {
+    // Register the handler for when the posts data changes
+
+    final DocumentReference _invoiceDocumentReference =
+        Firestore.instance.document(_invoicesPath + "/" + invoiceid);
+
+    _invoiceDocumentReference.snapshots().listen((invoiceSnapshot) {
+      if (invoiceSnapshot.exists) {
+        var invoice =
+            Invoice.fromMap(invoiceSnapshot.data, invoiceSnapshot.documentID);
+
+        // Add the posts onto the controller
+
+        _invoiceController.add(invoice);
+      }
+    });
+
+    // Return the stream underlying our _postsController.
+    return _invoiceController.stream;
+  }
+
+  final StreamController<List<InvoiceDetail>> _invoiceDetailController =
+      StreamController<List<InvoiceDetail>>.broadcast();
+
+  Stream listenToInvoiceDetailRealTime(String invoiceid) {
+    String s = sprintf(_invoiceDetailsPath, [invoiceid]);
+    final CollectionReference _invoiceDetailCollectionReference =
+        Firestore.instance.collection(s);
+
+    _invoiceDetailCollectionReference.snapshots().listen((snapshot) async {
+      var invoiceDetails = snapshot.documents
+          .map((snapshot) =>
+              InvoiceDetail.fromMap(snapshot.data, snapshot.documentID))
+          .toList();
+
+      // Add the posts onto the controller
+      _invoiceDetailController.add(invoiceDetails);
+      // }
+    });
+    // Return the stream underlying our _postsController.
+    return _invoiceDetailController.stream;
+  }
+
+  Future deleteInvoiceDetail(String invoiceid, String documentId) async {
+    String s = sprintf(_invoiceDetailsPath, [invoiceid]);
+    final CollectionReference _invoiceDetailCollectionReference =
+        Firestore.instance.collection(s);
+    await _invoiceDetailCollectionReference.document(documentId).delete();
+  }
+
+  Future updateInvoiceDetail(InvoiceDetail data) async {
+    String s = sprintf(_invoiceDetailsPath, [data.invoiceid]);
+    final CollectionReference _invoiceDetailCollectionReference =
+        Firestore.instance.collection(s);
+    try {
+      await _invoiceDetailCollectionReference
+          .document(data.invoicedetailid)
+          .updateData(data.toMap());
+      return true;
+    } catch (e) {
+      if (e is PlatformException) {
+        return e.message;
+      }
+
+      return e.toString();
+    }
+  }
+
+//----------------------------STATUS DETAIL------------------------------
+
+  final StreamController<List<DetailStatus>> _statusDetailController =
+      StreamController<List<DetailStatus>>.broadcast();
+
+  Stream listenToDetailStatusRealTime(String invoiceid) {
+    String s = sprintf(_detailStatusesPath, [invoiceid]);
+    final CollectionReference _statusDetailCollectionReference =
+        Firestore.instance.collection(s);
+
+    _statusDetailCollectionReference.snapshots().listen((snapshot) async {
+      var statusDetails = snapshot.documents
+          .map((snapshot) =>
+              DetailStatus.fromMap(snapshot.data, snapshot.documentID))
+          .toList();
+
+      // Add the posts onto the controller
+      _statusDetailController.add(statusDetails);
+      // }
+    });
+    // Return the stream underlying our _postsController.
+    return _statusDetailController.stream;
+  }
+
+  //----------------------------
+  Future addDetailStatus(String invoiceid, DetailStatus detailstatus) async {
+    String s = sprintf(_detailStatusesPath, [invoiceid]);
+    final CollectionReference _detailStatusCollectionReference =
+        Firestore.instance.collection(s);
+
+    try {
+      await _detailStatusCollectionReference
+          .document(detailstatus.status.toString())
+          .setData(detailstatus.toMap());
+      return true;
+    } catch (e) {
+      return e.toString();
+    }
   }
 }

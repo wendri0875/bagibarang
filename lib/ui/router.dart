@@ -1,9 +1,13 @@
 import 'package:bagi_barang/constants/route_names.dart';
+import 'package:bagi_barang/ui/views/choose_addresses_view.dart';
+import 'package:bagi_barang/ui/views/create_address_view.dart';
 import 'package:bagi_barang/ui/views/create_invoice_view.dart';
 import 'package:bagi_barang/ui/views/create_order_view.dart';
 import 'package:bagi_barang/ui/views/create_product_view.dart';
 import 'package:bagi_barang/ui/views/create_stock_view.dart';
+import 'package:bagi_barang/ui/views/detail_status_view.dart';
 import 'package:bagi_barang/ui/views/home_view.dart';
+import 'package:bagi_barang/ui/views/invoice_view.dart';
 import 'package:bagi_barang/ui/views/login_view.dart';
 import 'package:bagi_barang/ui/views/product_detail.dart';
 import 'package:bagi_barang/ui/views/signup_view.dart';
@@ -58,6 +62,30 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           routeName: settings.name,
           arguments: settings.arguments,
           viewToShow: CreateInvoiceView());
+
+    case ChooseAddressViewRoute:
+      return _getPageRoute(
+          routeName: settings.name,
+          arguments: settings.arguments,
+          viewToShow: ChooseAddressView());
+
+    case CreateAddressViewRoute:
+      return _getPageRoute(
+          routeName: settings.name,
+          arguments: settings.arguments,
+          viewToShow: CreateAddressView());
+
+    case InvoiceViewRoute:
+      return _getPageRoute(
+          routeName: settings.name,
+          arguments: settings.arguments,
+          viewToShow: InvoiceView());
+
+    case DetailStatusViewRoute:
+      return _getPageRoute(
+          routeName: settings.name,
+          arguments: settings.arguments,
+          viewToShow: DetailStatusView());
 
     default:
       return MaterialPageRoute(

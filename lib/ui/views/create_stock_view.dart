@@ -1,5 +1,6 @@
 import 'package:bagi_barang/models/order.dart';
 import 'package:bagi_barang/models/stock.dart';
+import 'package:bagi_barang/ui/shared/shared_styles.dart';
 import 'package:bagi_barang/ui/shared/ui_helpers.dart';
 import 'package:bagi_barang/ui/widgets/busy_button.dart';
 import 'package:bagi_barang/ui/widgets/input_field.dart';
@@ -36,9 +37,9 @@ class CreateStockView extends StatelessWidget {
         // update the text in the controller
 
         if (edittingStock != null) {
-        noteController.text = edittingStock?.note ?? '';
-        qtyController.text = edittingStock?.qty.toString() ?? '';
-        stockid = edittingStock?.stockid ?? '';
+          noteController.text = edittingStock?.note ?? '';
+          qtyController.text = edittingStock?.qty.toString() ?? '';
+          stockid = edittingStock?.stockid ?? '';
         }
 
         // set the editting post
@@ -64,69 +65,72 @@ class CreateStockView extends StatelessWidget {
           //       !model.busy ? Theme.of(context).primaryColor : Colors.grey[600],
           // ),
           body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            verticalSpace(40),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                verticalSpace(40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Stock',
-                      style: TextStyle(fontSize: 26),
-                    ),
-                    BusyButton(
-                      title: "✅",
-                      busy: model.busy,
-                      // child: !model.busy
-                      //     ? Icon(Icons.check)
-                      //     : CircularProgressIndicator(
-                      //         valueColor: AlwaysStoppedAnimation(Colors.white),
-                      //       ),
-                      onPressed: () {
-                        if (!model.busy)
-                          model.addStock(
-                              stockid: stockid,
-                              idprod: idprod,
-                              label: label,
-                              note: noteController.text,
-                              qty: double.tryParse(qtyController.text));
-                      },
-                    )
-                  ],
+                Text(
+                  'Stock',
+                  style: TextStyle(fontSize: 26),
                 ),
-                verticalSpaceMedium,
-                Text('Note'),
-                verticalSpaceSmall,
-                InputField(
-                  placeholder: 'Note',
-                  controller: noteController,
-                ),
-                verticalSpaceMedium,
-                Text('Quantity'),
-                verticalSpaceSmall,
-                InputField(
-                  textInputType: TextInputType.number,
-                  placeholder: 'Quantity',
-                  controller: qtyController,
-                ),
-                
+                BusyButton(
+                  child: Text(
+                    "✅",
+                    style: buttonTitleTextStyle,
+                  ),
 
-                // Container(
-                //   height: 250,
-                //   decoration: BoxDecoration(
-                //       color: Colors.grey[200],
-                //       borderRadius: BorderRadius.circular(10)),
-                //   alignment: Alignment.center,
-                //   child: Text(
-                //     'Tap to add post image',
-                //     style: TextStyle(color: Colors.grey[400]),
-                //   ),
-                // )
+                  busy: model.busy,
+                  // child: !model.busy
+                  //     ? Icon(Icons.check)
+                  //     : CircularProgressIndicator(
+                  //         valueColor: AlwaysStoppedAnimation(Colors.white),
+                  //       ),
+                  onPressed: () {
+                    if (!model.busy)
+                      model.addStock(
+                          stockid: stockid,
+                          idprod: idprod,
+                          label: label,
+                          note: noteController.text,
+                          qty: double.tryParse(qtyController.text));
+                  },
+                )
               ],
             ),
-          )),
+            verticalSpaceMedium,
+            Text('Note'),
+            verticalSpaceSmall,
+            InputField(
+              placeholder: 'Note',
+              controller: noteController,
+            ),
+            verticalSpaceMedium,
+            Text('Quantity'),
+            verticalSpaceSmall,
+            InputField(
+              textInputType: TextInputType.number,
+              placeholder: 'Quantity',
+              controller: qtyController,
+            ),
+
+            // Container(
+            //   height: 250,
+            //   decoration: BoxDecoration(
+            //       color: Colors.grey[200],
+            //       borderRadius: BorderRadius.circular(10)),
+            //   alignment: Alignment.center,
+            //   child: Text(
+            //     'Tap to add post image',
+            //     style: TextStyle(color: Colors.grey[400]),
+            //   ),
+            // )
+          ],
+        ),
+      )),
     );
   }
 }

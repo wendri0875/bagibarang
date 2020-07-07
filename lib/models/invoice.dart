@@ -1,53 +1,69 @@
 import 'package:bagi_barang/models/order.dart';
-import 'package:intl/intl.dart';
 
 class Invoice {
   var invoiceid;
   var date;
   var custid;
   var custname;
+  var addressid;
   var recipient;
   var address;
-  var telp;
+  var phone;
+  var deflt;
+  var ttlitem;
   var ttlweight;
   var subtotal;
-  var adjustment;
-  var ongkir;
+  var correction;
+  var postage;
   var total;
+  var status;
+  var courier;
+  var waybill;
+  var paymtd;
 
   Invoice(
       {this.invoiceid,
       this.date,
       this.custid,
       this.custname,
+      this.addressid,
       this.recipient,
       this.address,
-      this.telp,
+      this.phone,
+      this.deflt,
+      this.ttlitem,
       this.ttlweight,
       this.subtotal,
-      this.adjustment,
-      this.ongkir,
-      this.total}) {
+      this.correction,
+      this.postage,
+      this.total,
+      this.status,
+      this.courier,
+      this.waybill,
+      this.paymtd,
+      }) {
     this.invoiceid = invoiceid;
     this.custid = custid;
     this.custname = custname;
+    this.addressid = addressid;
     this.recipient = recipient;
     this.address = address;
-    this.telp = telp;
+    this.phone = phone;
+    this.deflt = deflt;
+    this.ttlitem = ttlitem;
     this.ttlweight = ttlweight;
     this.subtotal = subtotal;
-    this.adjustment = adjustment;
-    this.ongkir = ongkir;
+    this.correction = correction;
+    this.postage = postage;
     this.total = total;
+    this.status = status;
+    this.courier = courier;
+    this.waybill = waybill;
+    this.paymtd =paymtd;
   }
 
   static Invoice fromMap(Map<String, dynamic> map, String documentId) {
     if (map == null) return null;
-    var f = new NumberFormat("#,###.#");
-    final d = new DateFormat('dd MMM  hh:mm');
-
-    DateTime o = map["orderdate"].toDate() ?? null;
-    var a = map["allocated"] ?? null;
 
     return Invoice(
         invoiceid: documentId,
@@ -55,12 +71,19 @@ class Invoice {
         custid: map["custid"],
         custname: map["custname"],
         recipient: map["recipient"],
+        addressid: map["addressid"],
         address: map["address"],
-        telp: map["telp"],
+        phone: map["phone"],
+        deflt: map["deflt"],
+        status: map["status"],
+        courier: map["courier"],
+        waybill: map["waybill"],
+        paymtd: map["paymtd"],
+        ttlitem: double.parse((map["ttlitem"] ?? 0).toString()),
         ttlweight: double.parse((map["ttlweight"] ?? 0).toString()),
         subtotal: double.parse((map["subtotal"] ?? 0).toString()),
-        adjustment: double.parse((map["adjustment"] ?? 0).toString()),
-        ongkir: double.parse((map["ongkir"] ?? 0).toString()),
+        correction: double.parse((map["correction"] ?? 0).toString()),
+        postage: double.parse((map["postage"] ?? 0).toString()),
         total: double.parse((map["total"] ?? 0).toString()));
   }
 
@@ -74,14 +97,21 @@ class Invoice {
       if (date != null) 'date': date,
       if (custid != null) 'custid': custid,
       if (custname != null) 'custname': custname,
+      if (addressid != null) 'addressid': addressid,
       if (recipient != null) 'recipient': recipient,
       if (address != null) 'address': address,
-      if (telp != null) 'telp': telp,
-      if (ttlweight != null) 'weight': ttlweight,
+      if (phone != null) 'phone': phone,
+      if (deflt != null) 'deflt': deflt,
+      if (status != null) 'status': status,
+      if (ttlitem != null) 'ttlitem': ttlitem,
+      if (ttlweight != null) 'ttlweight': ttlweight,
       if (subtotal != null) 'subtotal': subtotal,
-      if (adjustment != null) 'adjustment': adjustment,
-      if (ongkir != null) 'ongkir': ongkir,
+      if (correction != null) 'correction': correction,
+      if (postage != null) 'postage': postage,
       if (total != null) 'total': total,
+      if (courier != null) 'courier': courier,
+      if (waybill != null) 'waybill': waybill,
+      if (paymtd != null) 'paymtd': paymtd,
     };
   }
 }

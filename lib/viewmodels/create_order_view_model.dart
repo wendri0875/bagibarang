@@ -60,7 +60,8 @@ class CreateOrderViewModel extends BaseModel {
       @required String label,
       String orderid,
       @required String custid,
-      @required double orderqty}) async {
+      @required double orderqty,
+      @required double pending}) async {
     setBusy(true);
 
     Timestamp date = Timestamp.fromDate(DateTime.now());
@@ -78,7 +79,7 @@ class CreateOrderViewModel extends BaseModel {
               orderdate: date,
               idprod: idprod,
               varian: label,
-              unshipped: orderqty,
+              pending: orderqty,
               idcompany: "Al-Hayya"));
     } else {
       //edit
@@ -91,7 +92,7 @@ class CreateOrderViewModel extends BaseModel {
                 orderid: orderid,
                 custid: custid,
                 orderqty: orderqty,
-                unshipped: orderqty - (_edittingOrder.orderqty - _edittingOrder.unshipped),
+                pending: orderqty - (_edittingOrder.orderqty - _edittingOrder.pending),
                 //  orderdate: date,
                 allocated: _ttlorderalloc));
       } else {
@@ -139,7 +140,7 @@ class CreateOrderViewModel extends BaseModel {
         if (allocable >= qty) {
           Timestamp date = Timestamp.fromDate(DateTime.now());
           result = await _firestoreService.addAlloc(
-              idprod, label, orderid, Alloc(date: date, qty: qty));
+              idprod, label, orderid, Alloc(orderid:orderid,date: date, qty: qty, idcompany:_edittingOrder.idcompany, unshipped: qty,idprod: idprod,varian: label ));
         } else {
           if (allocable == 0)
             result = "Stock habis";
@@ -157,6 +158,7 @@ class CreateOrderViewModel extends BaseModel {
       if (allocable >= qty) {
         //cek melawan stock
         allocable = ttlstock - (ttlallocs - _edittingAlloc.qty);
+        double unshipped = (qty-_edittingAlloc.qty) + _edittingAlloc.unshipped??0;
         if (allocable >= qty) {
           result = await _firestoreService.updateAlloc(
               idprod,
@@ -165,6 +167,7 @@ class CreateOrderViewModel extends BaseModel {
               Alloc(
                 allocid: allocid,
                 qty: qty,
+                unshipped: unshipped
               ));
         } else {
           if (allocable == 0)

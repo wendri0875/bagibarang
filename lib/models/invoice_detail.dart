@@ -1,9 +1,12 @@
+import 'package:bagi_barang/models/alloc.dart';
 import 'package:bagi_barang/models/order.dart';
 import 'package:intl/intl.dart';
 
 class InvoiceDetail {
+  var invoicedetailid;
   var invoiceid;
   var orderid;
+  var allocid;
   var idprod;
   var varian;
   var qty;
@@ -14,10 +17,13 @@ class InvoiceDetail {
   var discount;
   var linettl;
   var lineweight;
+  var cancel;
 
   InvoiceDetail(
-      {this.invoiceid,
+      {this.invoicedetailid,
+      this.invoiceid,
       this.orderid,
+      this.allocid,
       this.idprod,
       this.varian,
       this.qty,
@@ -27,9 +33,12 @@ class InvoiceDetail {
       this.price,
       this.discount,
       this.linettl,
-      this.lineweight}) {
+      this.lineweight,
+      this.cancel}) {
+    this.invoicedetailid = invoicedetailid;
     this.invoiceid = invoiceid;
     this.orderid = orderid;
+    this.allocid = allocid;
     this.idprod = idprod;
     this.varian = varian;
     this.qty = qty;
@@ -40,37 +49,16 @@ class InvoiceDetail {
     this.discount = discount;
     this.linettl = linettl;
     this.lineweight = lineweight;
+    this.cancel = cancel;
   }
-
-  // Order.fromSnapshot(DocumentSnapshot snapshot) {
-  //   var f = new NumberFormat("#,###.#", "id");
-  //   //var wf = new NumberFormat("#,###.#", "en_US");
-
-  //   timeago.setLocaleMessages('id', timeago.IdMessages());
-
-  //   this.custid = snapshot?.data["custid"] ?? null;
-  //   this.orderid = snapshot.documentID;
-  //   //this.orderdate = snapshot?.data["orderdate"] ?? null;
-
-  //   DateTime o = snapshot.data["orderdate"].toDate() ?? null;
-  //   this.orderdate = o == null ? "" : timeago.format(o, locale: "id");
-
-  //   var q = snapshot?.data["orderqty"] ?? null;
-  //   this.orderqty = q == null ? "" : f.format(q);
-  // }
 
   static InvoiceDetail fromMap(Map<String, dynamic> map, String documentId) {
     if (map == null) return null;
-    var f = new NumberFormat("#,###.#");
-    //timeago.setLocaleMessages('id', timeago.IdMessages());
-    final d = new DateFormat('dd MMM  hh:mm');
-
-    DateTime o = map["orderdate"].toDate() ?? null;
-    // var q = map["orderqty"] ?? null;
-    var a = map["allocated"] ?? null;
 
     return InvoiceDetail(
-        invoiceid: documentId,
+        invoicedetailid: documentId,
+        allocid: map["allocid"],
+        invoiceid: map["invoiceid"],
         orderid: map["orderid"],
         idprod: map["idprod"],
         varian: map["varian"],
@@ -81,18 +69,25 @@ class InvoiceDetail {
         price: map["price"],
         discount: map["discount"],
         linettl: map["linettl"],
-        lineweight:  map["lineweight"]);
+        lineweight: map["lineweight"],
+        cancel: map["cancel"]);
   }
 
-  static InvoiceDetail fromOrder(Order order) {
+  static InvoiceDetail fromAlloc(Alloc alloc) {
     return InvoiceDetail(
-      orderid: order.orderid,  idprod: order.idprod, varian: order.varian, qty: order.unshipped);
+        orderid: alloc.orderid,
+        idprod: alloc.idprod,
+        varian: alloc.varian,
+        qty: alloc.unshipped,
+        allocid: alloc.allocid);
   }
 
   Map<String, dynamic> toMap() {
     return {
+      if (invoiceid != null) 'invoiceid': invoiceid,
       if (orderid != null) 'orderid': orderid,
-      if (idprod != null) 'custid': idprod,
+      if (allocid != null) 'allocid': allocid,
+      if (idprod != null) 'idprod': idprod,
       if (varian != null) 'varian': varian,
       if (qty != null) 'qty': qty,
       if (pname != null) 'pname': pname,
@@ -101,7 +96,8 @@ class InvoiceDetail {
       if (price != null) 'price': price,
       if (discount != null) 'discount': discount,
       if (linettl != null) 'linettl': linettl,
-      if (lineweight != null) 'lineweight': lineweight
+      if (lineweight != null) 'lineweight': lineweight,
+      if (cancel != null) 'cancel': cancel
     };
   }
 }

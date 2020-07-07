@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:bagi_barang/models/variant.dart';
 import 'package:bagi_barang/ui/widgets/variant_selector.dart';
 import 'package:bagi_barang/viewmodels/product_detail_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -17,13 +18,16 @@ class ProductDetailView extends StatelessWidget {
     // than having to individually change instances of widgets.
 
     String idprod;
+    Variant varian;
 
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
 
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     if (arguments != null) {
       idprod = arguments['idprod'];
+   //   varian = arguments['varian'];
     }
+
 
     return ViewModelProvider<ProductDetailModel>.withConsumer(
       viewModel: ProductDetailModel(),
@@ -49,7 +53,6 @@ class ProductDetailView extends StatelessWidget {
                   // ),
                 ),
               ),
-             
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -86,13 +89,16 @@ class ProductDetailView extends StatelessWidget {
                         SizedBox(
                           height: ScreenUtil().setHeight(20),
                         ),
-                        VariantGridSelector(product: model.product),
+                        VariantGridSelector(
+                            product: model.product,
+                         //   varian: varian
+                         ), // masukkan juga label dari argumen bila mau auto show varian
                       ],
                     ),
                   )
                 ],
               ),
-               Positioned(
+              Positioned(
                 top: 40,
                 left: 20,
                 right: 20,
@@ -105,16 +111,14 @@ class ProductDetailView extends StatelessWidget {
                           color: Colors.black,
                         ),
                         onPressed: () {
-                        model.close();
+                          model.close();
                         }),
                     IconButton(
                       icon: Icon(
                         Icons.share,
                         color: Colors.black,
                       ),
-                      onPressed: () {
-                   
-                      },
+                      onPressed: () {},
                     )
                   ],
                 ),

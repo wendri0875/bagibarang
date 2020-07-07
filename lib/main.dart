@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
           fontFamily: 'FuturaLight',
           primarySwatch: Colors.green,
-          primaryColor: Color.fromARGB(255, 9, 202, 172),
+          primaryColor: Colors.white,
           scaffoldBackgroundColor: Colors.white,
           //   backgroundColor: Color.fromARGB(255, 26, 27, 30),
           backgroundColor: Colors.white),

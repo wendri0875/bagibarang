@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 /// A button that shows a busy indicator in place of title
 class BusyButton extends StatefulWidget {
   final bool busy;
-  final String title;
+  final Widget child;
   final Function onPressed;
   final bool enabled;
+  final Color color;
   const BusyButton(
-      {@required this.title,
+      {@required this.child,
       this.busy = false,
       @required this.onPressed,
-      this.enabled = true});
+      this.enabled = true,
+      this.color});
 
   @override
   _BusyButtonState createState() => _BusyButtonState();
@@ -32,14 +34,17 @@ class _BusyButtonState extends State<BusyButton> {
               horizontal: widget.busy ? 10 : 15,
               vertical: widget.busy ? 10 : 10),
           decoration: BoxDecoration(
-            color: widget.enabled ? Colors.grey[800] : Colors.grey[300],
+            color: widget.enabled
+                ? widget.color ?? Colors.grey[800]
+                : Colors.grey[300],
             borderRadius: BorderRadius.circular(5),
           ),
           child: !widget.busy
-              ? Text(
-                  widget.title,
-                  style: buttonTitleTextStyle,
-                )
+              ? widget.child
+              // ? Text(
+              //     widget.title,
+              //     style: buttonTitleTextStyle,
+              //   )
               : CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),

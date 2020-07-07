@@ -1,18 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 class Order {
   var orderid;
   var custid;
   var idprod;
+  var imageUrl;
   var varian;
   var orderdate;
   var orderqty;
   var allocated;
   var idcompany;
-  var unshipped;
-
+  var pending;
+  var pendingqty;
   var pname;
   var weight;
   var price;
@@ -21,12 +20,14 @@ class Order {
     this.orderid,
     this.custid,
     this.idprod,
+    this.imageUrl,
     this.varian,
     this.orderdate,
     this.orderqty,
     this.allocated,
     this.idcompany,
-    this.unshipped,
+    this.pending,
+    this.pendingqty,
     this.pname,
     this.weight,
     this.price,
@@ -34,13 +35,14 @@ class Order {
     this.orderid = orderid;
     this.custid = custid;
     this.idprod = idprod;
+    this.imageUrl = imageUrl;
     this.varian = varian;
     this.orderdate = orderdate;
     this.orderqty = orderqty;
     this.allocated = allocated;
     this.idcompany = idcompany;
-    this.unshipped = unshipped;
-
+    this.pending = pending;
+    this.pendingqty = pendingqty;
     this.pname = pname;
     this.weight = weight;
     this.price = price;
@@ -79,12 +81,13 @@ class Order {
         idprod: map["idprod"],
         varian: map["varian"],
         orderdate: map["orderdate"],
-      //  orderdate: o == null ? "" : d.format(o),
+        //  orderdate: o == null ? "" : d.format(o),
         //orderqty: q == null ? "" : f.format(q),
         orderqty: double.parse((map["orderqty"] ?? 0).toString()),
         allocated: double.parse((map["allocated"] ?? 0).toString()),
         idcompany: map["idcompany"],
-        unshipped: double.parse((map["unshipped"] ?? 0).toString()));
+        pending: map["pending"],
+        pendingqty: double.parse((map["pendingqty"] ?? 0).toString()));
   }
 
   Map<String, dynamic> toMap() {
@@ -96,7 +99,8 @@ class Order {
       if (orderqty != null) 'orderqty': orderqty,
       if (allocated != null) 'allocated': allocated,
       if (idcompany != null) 'idcompany': idcompany,
-      if (unshipped != null) 'unshipped': unshipped,
+      if (pending != null) 'pending': pending,
+      if (pendingqty != null) 'pending': pendingqty,
     };
   }
 }
